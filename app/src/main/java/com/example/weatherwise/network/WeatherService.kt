@@ -16,6 +16,7 @@ interface WeatherService {
         @Query("lon") lon : String,
         @Query("exclude") exclude : String = "minutely",
         @Query("lang") lang : String,
+        @Query("units") units : String,
         @Query("appid") appId : String = APP_ID,
-    ) : Response<WeatherResponse>
+    ) : WeatherResponse
 }

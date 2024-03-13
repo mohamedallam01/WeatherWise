@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@layout/fragment_home"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/home_graph"
+    app:restoreState="true"
     app:popUpTo="@id/home_graph"
-    app:popUpToSaveState="true"
-    android:id="@+id/nav_graph" >
+    app:popUpToSaveState="true">
+
     <include app:graph="@navigation/home_graph" />
+    <include app:graph="@navigation/alert_graph" />
+    <include app:graph="@navigation/favorite_graph" />
+    <include app:graph="@navigation/settings_graph" />
 </navigation>
