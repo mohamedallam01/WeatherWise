@@ -11,4 +11,5 @@
     <string name="hello_settings_fragment1">Hello Settings Fragment</string>
     <string name="hello_alert_fragment">Hello Alert Fragment</string>
     <string name="hello_favorite_fragment">Hello favorite Fragment</string>
+    <string name="weather_icon">Weather Icon</string>
 </resources>

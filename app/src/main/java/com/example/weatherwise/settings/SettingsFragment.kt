@@ -5,9 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import com.example.weatherwise.R
-import com.example.weatherwise.home.HomeFragment
 
 class SettingsFragment : Fragment() {
 
