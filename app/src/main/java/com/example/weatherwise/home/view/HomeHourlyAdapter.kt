@@ -28,7 +28,7 @@ class HomeHourlyAdapter(private val context: Context) :
     override fun onBindViewHolder(holder: HourlyViewHolder, position: Int) {
         val hourlyForecast: HourlyForecast = getItem(position)
 
-        val time = convertTime(hourlyForecast.dt)
+        val time = convertTimestampToDate(hourlyForecast.dt)
         val icon = convertIconCode(hourlyForecast.weather[0].icon)
         holder.timeHourly.text = time
         holder.tempHourly.text = hourlyForecast.temp.toString()
@@ -43,7 +43,7 @@ class HomeHourlyAdapter(private val context: Context) :
 }
 
 
-private fun convertTime(timeStamp: Long): String {
+private fun convertTimestampToDate(timeStamp: Long): String {
     val simpleDateFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
     val date = Date(timeStamp * 1000)
     return simpleDateFormat.format(date)

@@ -50,6 +50,8 @@ class HomeFragment : Fragment() {
     private lateinit var tvMain :TextView
     private lateinit var homeHourlyAdapter: HomeHourlyAdapter
     private lateinit var rvHourly : RecyclerView
+    private lateinit var rvDaily : RecyclerView
+    private lateinit var homeDailyAdapter: HomeDailyAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,10 +74,15 @@ class HomeFragment : Fragment() {
         tvTempDegree = view.findViewById(R.id.tv_temp_degree)
         tvMain = view.findViewById(R.id.tv_main)
         rvHourly = view.findViewById(R.id.rv_hourly)
+        rvDaily = view.findViewById(R.id.rv_daily)
 
         homeHourlyAdapter = HomeHourlyAdapter(requireContext())
         rvHourly.adapter = homeHourlyAdapter
         rvHourly.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL,false)
+
+        homeDailyAdapter = HomeDailyAdapter(requireContext())
+        rvDaily.adapter = homeDailyAdapter
+        rvDaily.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL,false)
 
         homeViewModelFactory = HomeViewModelFactory(
             WeatherRepoImpl.getInstance(
@@ -106,6 +113,7 @@ class HomeFragment : Fragment() {
                         Log.d(TAG, "Success Result: ${result.data.hourly} ")
                         setHomeData(result.data)
                         homeHourlyAdapter.submitList(result.data.hourly)
+                        homeDailyAdapter.submitList(result.data.daily)
                     }
                     is ApiState.Failure -> {
                         progressBar.visibility = View.GONE
