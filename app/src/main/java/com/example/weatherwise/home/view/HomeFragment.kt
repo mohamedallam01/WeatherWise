@@ -110,7 +110,7 @@ class HomeFragment : Fragment() {
                     }
                     is ApiState.Success ->{
                         progressBar.visibility = View.GONE
-                        Log.d(TAG, "Success Result: ${result.data.hourly} ")
+                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
                         setHomeData(result.data)
                         homeHourlyAdapter.submitList(result.data.hourly)
                         homeDailyAdapter.submitList(result.data.daily)

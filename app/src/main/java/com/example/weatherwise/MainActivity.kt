@@ -17,14 +17,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
-import com.example.weatherwise.alert.AlertFragment
-import com.example.weatherwise.favorite.FavoriteFragment
-import com.example.weatherwise.home.view.HomeFragment
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
-import com.example.weatherwise.settings.SettingsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 const val REQUEST_LOCATION_CODE = 2005
