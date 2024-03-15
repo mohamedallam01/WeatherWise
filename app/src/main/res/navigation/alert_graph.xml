@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/alertFragment"
-        android:name="com.example.weatherwise.alert.AlertFragment"
+        android:name="com.example.weatherwise.alert.view.AlertFragment"
         android:label="fragment_alert"
         tools:layout="@layout/fragment_alert" />
 </navigation>
