@@ -16,23 +16,37 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.weatherwise.R
+import com.example.weatherwise.alert.ALERT_DESC
 import com.example.weatherwise.alert.CHANNEL_ID
 import com.example.weatherwise.alert.NOTIFICATION_ID
 import com.example.weatherwise.alert.NotificationReceiver
-import com.example.weatherwise.alert.TIME_IN_MILLIS
+import com.example.weatherwise.alert.viewmodel.AlertViewModel
+import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
+import com.example.weatherwise.model.WeatherRepoImpl
+import com.example.weatherwise.network.ApiState
+import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 
 class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerDialog.OnTimeSetListener {
+    private val TAG = "AlertFragment"
+
 
     private lateinit var fabAddAlert : FloatingActionButton
-    private val TAG = "AlertFragment"
+
+
     private  var day : Int = 0
     private  var month : Int = 0
     private  var year : Int = 0
@@ -44,6 +58,13 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
     private  var savedYear : Int = 0
     private  var savedHour : Int = 0
     private  var savedMinute : Int = 0
+
+    private lateinit var alertViewModel: AlertViewModel
+    private lateinit var alertViewModelFactory: AlertViewModelFactory
+
+    private lateinit var  pendingIntent : PendingIntent
+
+    private lateinit var broadcastIntent : Intent
 
     val calender = Calendar.getInstance()
 
@@ -68,6 +89,18 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
         super.onViewCreated(view, savedInstanceState)
 
         fabAddAlert = view.findViewById(R.id.fab_add_alert)
+
+        alertViewModelFactory = AlertViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance()
+
+            )
+        )
+
+
+        alertViewModel = ViewModelProvider(this,alertViewModelFactory).get(AlertViewModel::class.java)
+
+
 
         pickDate()
 
@@ -127,20 +160,70 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
-        val intent = Intent(requireActivity().applicationContext, NotificationReceiver::class.java)
-        intent.putExtra(TIME_IN_MILLIS, dateTimeInMillis)
-        val pendingIntent = PendingIntent.getBroadcast(requireContext(),
-            NOTIFICATION_ID, intent,
-            PendingIntent.FLAG_IMMUTABLE)
+        alertViewModel.setAlertLocation("33.44", "-94.04", "en", "metric")
+        lifecycleScope.launch {
+            alertViewModel.alertWeather.collectLatest {
+                    result ->
 
-        val alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
-        } else if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                when(result){
+                    is ApiState.Loading ->{
+                        //progressBar.visibility = View.VISIBLE
+                    }
+                    is ApiState.Success ->{
+                        //progressBar.visibility = View.GONE
+                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
+                        val goodWeather = "Good Weather, Enjoy"
+
+                         val desc = if(result.data.alerts.isNullOrEmpty() || result.data.alerts[0].description == null){
+
+                           goodWeather
+                        }
+                        else{
+
+                             result.data.alerts[0].description
+                        }
+
+                        withContext(Dispatchers.Main){
+
+                            broadcastIntent = Intent(requireActivity().applicationContext, NotificationReceiver::class.java)
+                            broadcastIntent.putExtra(ALERT_DESC, desc)
+
+                            Log.d(TAG, "scheduleNotification: $desc")
+                            pendingIntent = PendingIntent.getBroadcast(requireContext(),
+                                NOTIFICATION_ID, broadcastIntent,
+                                PendingIntent.FLAG_IMMUTABLE)
+
+                            val alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                            } else {
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                            }
+
+                        }
+
+
+                    }
+                    is ApiState.Failure -> {
+                        //progressBar.visibility = View.GONE
+                        Log.d(TAG, "Exception is: ${result.msg}")
+                        Toast.makeText(requireActivity(),result.msg.toString(), Toast.LENGTH_SHORT).show()
+                    }
+
+
+                }
+            }
+
+
         }
+
+
+
+
+
     }
 
 
