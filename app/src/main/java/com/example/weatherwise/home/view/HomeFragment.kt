@@ -3,6 +3,7 @@ package com.example.weatherwise.home.view
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -188,24 +189,17 @@ class HomeFragment : Fragment() {
                     val longitude = location?.longitude.toString()
                     val latitude = location?.latitude.toString()
 
-                    homeViewModel.setCurrentLocation(latitude, longitude, "en", "metric")
+                    Log.d(TAG, "Latitude: $latitude, Longitude: $longitude ")
+
+                    homeViewModel.setCurrentLocation(longitude, latitude, "en", "metric")
                     //val response = homeViewModel.getCurrentWeather(latitude, longitude, "en", "metric")
 
 
-
-//                    tvLongitude.text = longitude.toString()
-//                    tvLatitude.text = latitude.toString()
-
 //                    geocoder =
-//                        Geocoder(this@MainActivity).getFromLocation(latitude!!,longitude!!, 1)!!
-
-                    //  Log.d(TAG, "geocoder: $geocoder")
-
-//                   l
-
-                    //tvAddress.text = "Country: $countryName \n Address: $addressLine \n postalCode: $postalCode \n admin: $admin"
-
-
+//                        Geocoder(requireContext()).getFromLocation(30.070988580730607,31.372045263829136, 1)!!
+//
+//
+//                     Log.d(TAG, "Geocoder: $geocoder")
                     fusedLocationProviderClient.removeLocationUpdates(this)
 
                 }

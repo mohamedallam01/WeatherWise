@@ -40,35 +40,34 @@ import java.util.Calendar
 import java.util.Locale
 
 
-class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerDialog.OnTimeSetListener {
+class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
+    TimePickerDialog.OnTimeSetListener {
     private val TAG = "AlertFragment"
 
 
-    private lateinit var fabAddAlert : FloatingActionButton
+    private lateinit var fabAddAlert: FloatingActionButton
 
 
-    private  var day : Int = 0
-    private  var month : Int = 0
-    private  var year : Int = 0
-    private  var hour : Int = 0
-    private  var minute : Int = 0
+    private var day: Int = 0
+    private var month: Int = 0
+    private var year: Int = 0
+    private var hour: Int = 0
+    private var minute: Int = 0
 
-    private  var savedDay : Int = 0
-    private  var savedMonth : Int = 0
-    private  var savedYear : Int = 0
-    private  var savedHour : Int = 0
-    private  var savedMinute : Int = 0
+    private var savedDay: Int = 0
+    private var savedMonth: Int = 0
+    private var savedYear: Int = 0
+    private var savedHour: Int = 0
+    private var savedMinute: Int = 0
 
     private lateinit var alertViewModel: AlertViewModel
     private lateinit var alertViewModelFactory: AlertViewModelFactory
 
-    private lateinit var  pendingIntent : PendingIntent
+    private lateinit var pendingIntent: PendingIntent
 
-    private lateinit var broadcastIntent : Intent
+    private lateinit var broadcastIntent: Intent
 
     val calender = Calendar.getInstance()
-
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,16 +97,14 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
         )
 
 
-        alertViewModel = ViewModelProvider(this,alertViewModelFactory).get(AlertViewModel::class.java)
+        alertViewModel =
+            ViewModelProvider(this, alertViewModelFactory).get(AlertViewModel::class.java)
 
 
 
         pickDate()
 
     }
-
-
-
 
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
@@ -136,7 +133,6 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
     }
 
 
-
     private fun getDateTimeCalender(): Long {
         val calendar = Calendar.getInstance()
 
@@ -149,68 +145,88 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
     }
 
 
-    private fun pickDate(){
+    private fun pickDate() {
         fabAddAlert.setOnClickListener {
             year = calender.get(Calendar.YEAR)
             month = calender.get(Calendar.MONTH)
             day = calender.get(Calendar.DAY_OF_MONTH)
-            DatePickerDialog(requireContext(),this,year,month,day).show()
+            DatePickerDialog(requireContext(), this, year, month, day).show()
         }
     }
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
-        alertViewModel.setAlertLocation("33.44", "-94.04", "en", "metric")
+        alertViewModel.setAlertLocation("30.3153527", "31.3246404", "en", "metric")
         lifecycleScope.launch {
-            alertViewModel.alertWeather.collectLatest {
-                    result ->
+            alertViewModel.alertWeather.collectLatest { result ->
 
-                when(result){
-                    is ApiState.Loading ->{
+                when (result) {
+                    is ApiState.Loading -> {
                         //progressBar.visibility = View.VISIBLE
                     }
-                    is ApiState.Success ->{
+
+                    is ApiState.Success -> {
                         //progressBar.visibility = View.GONE
                         Log.d(TAG, "Success Result: ${result.data.alerts} ")
                         val goodWeather = "Good Weather, Enjoy"
 
-                         val desc = if(result.data.alerts.isNullOrEmpty() || result.data.alerts[0].description == null){
+                        val desc =
+                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts[0].description == null) {
 
-                           goodWeather
-                        }
-                        else{
+                                goodWeather
+                            } else {
 
-                             result.data.alerts[0].description
-                        }
+                                result.data.alerts[0].description
+                            }
 
-                        withContext(Dispatchers.Main){
+                        withContext(Dispatchers.Main) {
 
-                            broadcastIntent = Intent(requireActivity().applicationContext, NotificationReceiver::class.java)
+                            broadcastIntent = Intent(
+                                requireActivity().applicationContext,
+                                NotificationReceiver::class.java
+                            )
                             broadcastIntent.putExtra(ALERT_DESC, desc)
 
                             Log.d(TAG, "scheduleNotification: $desc")
-                            pendingIntent = PendingIntent.getBroadcast(requireContext(),
+                            pendingIntent = PendingIntent.getBroadcast(
+                                requireContext(),
                                 NOTIFICATION_ID, broadcastIntent,
-                                PendingIntent.FLAG_IMMUTABLE)
+                                PendingIntent.FLAG_IMMUTABLE
+                            )
 
-                            val alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                            val alarmManager =
+                                requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                                alarmManager.setExactAndAllowWhileIdle(
+                                    AlarmManager.RTC_WAKEUP,
+                                    dateTimeInMillis,
+                                    pendingIntent
+                                )
                             } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                                alarmManager.setExactAndAllowWhileIdle(
+                                    AlarmManager.RTC_WAKEUP,
+                                    dateTimeInMillis,
+                                    pendingIntent
+                                )
                             } else {
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, dateTimeInMillis, pendingIntent)
+                                alarmManager.set(
+                                    AlarmManager.RTC_WAKEUP,
+                                    dateTimeInMillis,
+                                    pendingIntent
+                                )
                             }
 
                         }
 
 
                     }
+
                     is ApiState.Failure -> {
                         //progressBar.visibility = View.GONE
                         Log.d(TAG, "Exception is: ${result.msg}")
-                        Toast.makeText(requireActivity(),result.msg.toString(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireActivity(), result.msg.toString(), Toast.LENGTH_SHORT)
+                            .show()
                     }
 
 
@@ -221,22 +237,19 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,TimePickerD
         }
 
 
-
-
-
     }
 
 
-
-    private fun createNotificationChannel(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Weather Channel"
             val desc = "Weather Desc"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID,name,importance).apply {
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = desc
             }
-            val notificationManger= requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManger =
+                requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManger.createNotificationChannel(channel)
 
         }

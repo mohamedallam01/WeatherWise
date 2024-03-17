@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Location Preferences">
+
+        <SwitchPreference
+            android:key="location_gps"
+            android:title="Get Location by GPS"
+            android:summary="Enable to get location automatically using GPS" />
+
+        <Preference
+            android:key="location_map"
+            android:title="Choose Location from Map"
+            android:summary="Tap to choose a specific location from the map" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Temperature Unit Preferences">
+
+
+        <ListPreference
+            android:key="temp_unit"
+            android:title="Temperature Unit"
+            android:summary="Choose your preferred temperature unit"
+            android:entries="@array/temp_unit_entries"
+            android:entryValues="@array/temp_unit_values"
+            android:defaultValue="celsius" />
+
+        <ListPreference
+            android:key="wind_unit"
+            android:title="Wind Speed Unit"
+            android:summary="Choose your preferred wind speed unit"
+            android:entries="@array/wind_unit_entries"
+            android:entryValues="@array/wind_unit_values"
+            android:defaultValue="meters_per_second" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="Language Preferences">
+
+
+        <ListPreference
+            android:key="language"
+            android:title="Language"
+            android:summary="Choose your preferred language"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values"
+            android:defaultValue="english" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

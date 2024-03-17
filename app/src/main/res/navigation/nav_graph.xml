@@ -11,5 +11,5 @@
     <include app:graph="@navigation/home_graph" />
     <include app:graph="@navigation/alert_graph" />
     <include app:graph="@navigation/favorite_graph" />
-    <include app:graph="@navigation/settings_graph" />
+    <include app:graph="@navigation/preferences_graph" />
 </navigation>
