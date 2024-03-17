@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.location.LocationManagerCompat.isLocationEnabled
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -59,7 +60,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.home -> navController.navigate(R.id.home_graph, null, navOptions)
                 R.id.alert -> navController.navigate(R.id.alert_graph, null, navOptions)
                 R.id.favorite -> navController.navigate(R.id.favorite_graph, null, navOptions)
-                R.id.settings -> navController.navigate(R.id.settings_graph, null, navOptions)
+                R.id.settings -> navController.navigate(R.id.preferences_graph, null, navOptions)
+
             }
             true
         }
