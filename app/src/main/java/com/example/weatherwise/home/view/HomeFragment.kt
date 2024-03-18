@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
 import com.example.weatherwise.REQUEST_LOCATION_CODE
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
@@ -87,7 +88,8 @@ class HomeFragment : Fragment() {
 
         homeViewModelFactory = HomeViewModelFactory(
             WeatherRepoImpl.getInstance(
-                WeatherRemoteDataSourceImpl.getInstance()
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(requireContext())
 
             )
         )
@@ -101,33 +103,46 @@ class HomeFragment : Fragment() {
         homeViewModel = ViewModelProvider(this,homeViewModelFactory).get(HomeViewModel::class.java)
 
         getFreshLocation()
-        lifecycleScope.launch {
-            homeViewModel.currentWeather.collectLatest {
-                    result ->
-
-                when(result){
-                    is ApiState.Loading ->{
-                        progressBar.visibility = View.VISIBLE
-                    }
-                    is ApiState.Success ->{
-                        progressBar.visibility = View.GONE
-                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
-                        setHomeData(result.data)
-                        homeHourlyAdapter.submitList(result.data.hourly)
-                        homeDailyAdapter.submitList(result.data.daily)
-                    }
-                    is ApiState.Failure -> {
-                        progressBar.visibility = View.GONE
-                        Log.d(TAG, "Exception is: ${result.msg}")
-                        Toast.makeText(requireActivity(),result.msg.toString(), Toast.LENGTH_SHORT).show()
-                    }
 
 
-                }
-            }
+        val currentWeatherFromDatabase = homeViewModel.currentWeather
+
+        Log.d(TAG, "currentWeatherFromDatabase: $currentWeatherFromDatabase ")
 
 
+        currentWeatherFromDatabase.observe(viewLifecycleOwner){
+            progressBar.visibility = View.GONE
+            setHomeData(it)
+            homeHourlyAdapter.submitList(it.hourly)
+            homeDailyAdapter.submitList(it.daily)
         }
+//        lifecycleScope.launch {
+//            homeViewModel.currentWeather.collectLatest {
+//                    result ->
+//
+//                when(result){
+//                    is ApiState.Loading ->{
+//                        progressBar.visibility = View.VISIBLE
+//                    }
+//                    is ApiState.Success ->{
+//                        progressBar.visibility = View.GONE
+//                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
+//                        setHomeData(result.data)
+//                        homeHourlyAdapter.submitList(result.data.hourly)
+//                        homeDailyAdapter.submitList(result.data.daily)
+//                    }
+//                    is ApiState.Failure -> {
+//                        progressBar.visibility = View.GONE
+//                        Log.d(TAG, "Exception is: ${result.msg}")
+//                        Toast.makeText(requireActivity(),result.msg.toString(), Toast.LENGTH_SHORT).show()
+//                    }
+//
+//
+//                }
+//            }
+//
+//
+//        }
 
 
 

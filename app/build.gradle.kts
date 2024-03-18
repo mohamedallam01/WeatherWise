@@ -70,7 +70,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("androidx.room:room-runtime:2.6.1")
     annotationProcessor("androidx.room:room-compiler:$room_version")
-   // kapt("androidx.room:room-compiler:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
 
     //Preferences Fragment
     implementation("androidx.preference:preference-ktx:$preference_version")

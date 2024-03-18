@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
@@ -69,7 +70,8 @@ class MainActivity : AppCompatActivity() {
 
         homeViewModelFactory = HomeViewModelFactory(
             WeatherRepoImpl.getInstance(
-                WeatherRemoteDataSourceImpl.getInstance()
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(this)
 
             )
         )
