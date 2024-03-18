@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.weatherwise.model.Alert
+import com.example.weatherwise.model.WeatherResponse
 
-@Database([Alert::class], version = 1)
+@Database([WeatherResponse::class], version = 1)
+@TypeConverters(Converters::class)
 abstract class WeatherDatabase : RoomDatabase() {
 
-    abstract fun getAlertDao(): WeatherDao
+    abstract fun getWeatherDao(): WeatherDao
 
     companion object {
         @Volatile
@@ -19,7 +22,8 @@ abstract class WeatherDatabase : RoomDatabase() {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext, WeatherDatabase::class.java, "weather_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

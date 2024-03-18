@@ -12,21 +12,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
 
     private val TAG = "HomeViewModel"
 
-    private val _currentWeather: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
-    val currentWeather = _currentWeather.asStateFlow()
+    private val _currentWeather: MutableLiveData<WeatherResponse> = MutableLiveData()
+    val currentWeather: LiveData<WeatherResponse> = _currentWeather
 
     fun setCurrentLocation(lat: String, lon: String, language: String, units: String) {
-        getCurrentWeather(lat, lon, language, units)
+        getCurrentWeatherFromDatabase(lat, lon, language, units)
     }
 
 
-    private fun getCurrentWeather(
+    private fun getCurrentWeatherFromDatabase(
         lat: String,
         lon: String,
         language: String,
@@ -34,14 +35,9 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {
-            _repo.getCurrentWeather(lat, lon, language, units)
-                .catch { error ->
-                    _currentWeather.value = ApiState.Failure(error)
-                }
-                .collect { data ->
-                    _currentWeather.value = ApiState.Success(data)
-                }
-
+             _repo.getWeatherResponse().collect{
+                _currentWeather.postValue(it)
+            }
 
             Log.d(TAG, "getCurrentWeather: $currentWeather")
 
@@ -49,7 +45,6 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
 
 
     }
-
 
 
 }

@@ -6,17 +6,26 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.weatherwise.model.Alert
+import com.example.weatherwise.model.WeatherResponse
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
 interface WeatherDao {
 
+
+    @Query("SELECT * from weather_table")
+    fun getWeatherResponse() : Flow<WeatherResponse>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAlert(alert: Alert)
+    suspend fun insertWeatherResponse(weatherResponse: WeatherResponse)
 
-    @Query("SELECT * from alerts_table")
-    suspend fun getAlert(): List<Alert>
-
-    @Delete
-    suspend fun deleteAlert(alert: Alert)
+//    @Insert(onConflict = OnConflictStrategy.IGNORE)
+//    suspend fun insertAlert(alert: Alert)
+//
+//    @Query("SELECT * from alerts_table")
+//    suspend fun getAlert(): List<Alert>
+//
+//    @Delete
+//    suspend fun deleteAlert(alert: Alert)
 }

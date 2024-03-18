@@ -27,6 +27,7 @@ import com.example.weatherwise.alert.NOTIFICATION_ID
 import com.example.weatherwise.alert.NotificationReceiver
 import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
@@ -91,7 +92,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
         alertViewModelFactory = AlertViewModelFactory(
             WeatherRepoImpl.getInstance(
-                WeatherRemoteDataSourceImpl.getInstance()
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(requireContext())
 
             )
         )

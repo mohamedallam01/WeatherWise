@@ -31,7 +31,7 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {
-            _repo.getCurrentWeather(lat, lon, language, units)
+            _repo.getCurrentWeatherFromRemote(lat, lon, language, units)
                 .catch { error ->
                     _alertWeather.value = ApiState.Failure(error)
                 }

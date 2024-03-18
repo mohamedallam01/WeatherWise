@@ -1,5 +1,7 @@
 package com.example.weatherwise.model
 
+import android.util.Log
+import com.example.weatherwise.dp.WeatherLocalDataSource
 import com.example.weatherwise.network.WeatherRemoteDataSource
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import kotlinx.coroutines.Dispatchers
@@ -8,20 +10,25 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 class WeatherRepoImpl private constructor(
-    private val weatherRemoteDataSource: WeatherRemoteDataSource
+    private val weatherRemoteDataSource: WeatherRemoteDataSource,
+    private val weatherLocalDataSource: WeatherLocalDataSource
 ) : WeatherRepo {
+    
+    private val TAG = "WeatherRepoImpl"
 
 
     companion object {
         private var instance: WeatherRepoImpl? = null
         fun getInstance(
             weatherRemoteDataSource: WeatherRemoteDataSource,
+            weatherLocalDataSource: WeatherLocalDataSource
 
-            ): WeatherRepoImpl {
+        ): WeatherRepoImpl {
 
             return instance ?: synchronized(this) {
                 val temp = WeatherRepoImpl(
                     weatherRemoteDataSource,
+                    weatherLocalDataSource
                 )
                 instance = temp
                 temp
@@ -31,21 +38,29 @@ class WeatherRepoImpl private constructor(
         }
     }
 
-    override fun getCurrentWeather(
+    override fun getWeatherResponse(): Flow<WeatherResponse> {
+        Log.d(TAG, "getWeatherResponse: ${weatherLocalDataSource.getWeatherResponse()}")
+        return weatherLocalDataSource.getWeatherResponse()
+    }
+
+    override fun getCurrentWeatherFromRemote(
         lat: String,
         lon: String,
         language: String,
         units: String
     ): Flow<WeatherResponse> = flow {
 
-        emit(
-            weatherRemoteDataSource.getCurrentWeather(
-                lat = lat,
-                lon = lon,
-                language = language,
-                units = units
-            )
+
+        val weatherResponseFromRemote = weatherRemoteDataSource.getCurrentWeather(
+            lat = lat,
+            lon = lon,
+            language = language,
+            units = units
         )
+
+
+        weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
+        emit(weatherResponseFromRemote)
 
     }.flowOn(Dispatchers.IO)
 }
