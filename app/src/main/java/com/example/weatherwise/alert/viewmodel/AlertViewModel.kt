@@ -40,7 +40,7 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
                 }
 
 
-            Log.d(TAG, "getCurrentWeather: $alertWeather")
+            Log.d(TAG, "getCurrentWeather: ${alertWeather.value}")
 
         }
 
