@@ -18,7 +18,7 @@ data class WeatherResponse(
     //val minutely: List<MinutelyForecast>,
     val daily: List<DailyForecast>,
     val hourly: List<HourlyForecast>,
-    val alerts : List<Alert>
+    val alerts : List<Alert>?
 )
 
 

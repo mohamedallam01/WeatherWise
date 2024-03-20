@@ -34,6 +34,7 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
             _repo.getCurrentWeatherFromRemote(lat, lon, language, units)
                 .catch { error ->
                     _alertWeather.value = ApiState.Failure(error)
+                    Log.d(TAG, "getCurrentWeather: ${alertWeather.value}")
                 }
                 .collect { data ->
                     _alertWeather.value = ApiState.Success(data)

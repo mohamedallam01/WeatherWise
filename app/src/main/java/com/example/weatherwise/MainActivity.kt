@@ -19,6 +19,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
+import com.example.weatherwise.home.view.HomeFragment
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)
 
 
+        HomeFragment()
         NavigationUI.setupWithNavController(bottomNavBar, navController)
 
         val navOptions = NavOptions.Builder()
@@ -79,11 +81,7 @@ class MainActivity : AppCompatActivity() {
         homeViewModel = ViewModelProvider(this,homeViewModelFactory).get(HomeViewModel::class.java)
         
         val response = homeViewModel.currentWeather
-        Log.d(TAG, "onCreate: ${response.value}")
-
-
-
-
+        Log.d(TAG, "response: ${response.value}")
 
 
         initUi()
@@ -111,15 +109,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
-
-    private fun loadFragment(fragment: Fragment) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.nav_host_fragment, fragment)
-        transaction.commit()
-
-    }
-
-
 
 
     private fun checkPermissions(): Boolean {

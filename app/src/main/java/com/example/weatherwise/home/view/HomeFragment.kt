@@ -94,7 +94,7 @@ class HomeFragment : Fragment() {
         rvDaily.adapter = homeDailyAdapter
         rvDaily.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-
+        getFreshLocation()
         homeViewModelFactory = HomeViewModelFactory(
             WeatherRepoImpl.getInstance(
                 WeatherRemoteDataSourceImpl.getInstance(),
@@ -204,7 +204,7 @@ class HomeFragment : Fragment() {
 
                     Log.d(TAG, "Latitude: $latitude, Longitude: $longitude ")
 
-                    homeViewModel.setCurrentLocation(longitude, latitude, "en", "metric")
+                    homeViewModel.setCurrentLocation("33.44", "-94.04", "en", "metric")
                     val response = homeViewModel.currentWeather.value
                     Log.d(TAG, "result: $response ")
 

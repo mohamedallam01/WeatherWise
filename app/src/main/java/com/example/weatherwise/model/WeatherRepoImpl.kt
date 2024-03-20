@@ -39,7 +39,7 @@ class WeatherRepoImpl private constructor(
     }
 
     override fun getWeatherResponse(): Flow<WeatherResponse> {
-        Log.d(TAG, "getWeatherResponse: ${weatherLocalDataSource.getWeatherResponse()}")
+        //Log.d(TAG, "getWeatherResponse: ${weatherLocalDataSource.getWeatherResponse()}")
         return weatherLocalDataSource.getWeatherResponse()
     }
 
@@ -59,8 +59,25 @@ class WeatherRepoImpl private constructor(
         )
 
 
-        weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
+
+        if (weatherResponseFromRemote != null){
+
+            try {
+                weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
+                Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
+            }
+            catch (exception :Exception){
+
+                Log.d(TAG, "Exception: $exception ")
+
+            }
+
+        }
+        else{
+            Log.d(TAG, "getCurrentWeatherFromRemote: Null")
+        }
         emit(weatherResponseFromRemote)
+
 
     }.flowOn(Dispatchers.IO)
 }
