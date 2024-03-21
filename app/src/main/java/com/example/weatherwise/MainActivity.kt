@@ -2,18 +2,17 @@ package com.example.weatherwise
 
 
 import android.content.Context
-import android.content.Intent
+import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
+import android.view.View
+import android.widget.ProgressBar
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.location.LocationManagerCompat.isLocationEnabled
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
@@ -21,21 +20,27 @@ import androidx.navigation.ui.NavigationUI
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
-import com.example.weatherwise.model.WeatherRepoImpl
-import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.ChecksManager.enableLocationService
+import com.example.weatherwise.util.INITIAL_CHOICE
+import com.example.weatherwise.util.INITIAL_PREFS
+import com.example.weatherwise.util.InitialSetupDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-const val REQUEST_LOCATION_CODE = 2005
+const val REQUEST_CODE = 2005
 
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
 
 
-
     private lateinit var bottomNavBar: BottomNavigationView
     private lateinit var navController: NavController
+    private lateinit var fragment: FragmentContainerView
+    lateinit var initialSetupDialog: InitialSetupDialog
+    lateinit var progressBar: ProgressBar
 
+    private var isPermissionGranted = false
 
 
     private lateinit var homeViewModel: HomeViewModel
@@ -44,10 +49,99 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+        fragment = findViewById(R.id.nav_host_fragment)
+        progressBar = findViewById(R.id.progress_Bar)
+        progressBar.visibility = View.GONE
+
+        Log.d(TAG, "onCreate: ")
+
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: ")
+
+        if (!::initialSetupDialog.isInitialized) {
+            initialSetupDialog = InitialSetupDialog()
+            initialSetupDialog.setPositiveButton(DialogInterface.OnClickListener { dialogInterface, _ ->
+                if (ChecksManager.isLocationIsEnabled(this)) {
+                    progressBar.visibility = View.VISIBLE
+                    Log.d(TAG, "First initMainActivity: 11111111111 ")
+                    initMainActivity()
+                } else {
+                    enableLocationService(this)
+                }
+            })
+
+            if (ChecksManager.checkPermission(this) && ChecksManager.notificationPermission(this)) {
+                if (!isInitialSetupDone()) {
+                    initialSetupDialog.show(supportFragmentManager, "InitialSetupDialog")
+                }
+            } else {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.POST_NOTIFICATIONS,
+                    ), REQUEST_CODE
+                )
+            }
+        }
+        else if (isPermissionGranted && isInitialSetupDone()){
+            progressBar.visibility = View.VISIBLE
+            Log.d(TAG, "Second initMainActivity: 222222222 ")
+            initMainActivity()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        Log.d(TAG, "onPause: ")
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.d(TAG, "onStop: ")
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE) {
+            val locationGranted = grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+            val notificationGranted = grantResults.size > 1 &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED
+
+            if (locationGranted && notificationGranted && !isInitialSetupDone()) {
+                isPermissionGranted = true
+                initialSetupDialog.show(supportFragmentManager, "InitialSetupDialog")
+
+            }
+        }
+        
+    }
+
+    private fun initMainActivity() {
+
+
         bottomNavBar = findViewById(R.id.bottom_nav_view)
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)
-
 
         NavigationUI.setupWithNavController(bottomNavBar, navController)
 
@@ -61,103 +155,73 @@ class MainActivity : AppCompatActivity() {
                 R.id.home -> navController.navigate(R.id.home_graph, null, navOptions)
                 R.id.alert -> navController.navigate(R.id.alert_graph, null, navOptions)
                 R.id.favorite -> navController.navigate(R.id.favorite_graph, null, navOptions)
-                R.id.settings -> navController.navigate(R.id.preferences_graph, null, navOptions)
+                R.id.settings -> navController.navigate(
+                    R.id.preferences_graph,
+                    null,
+                    navOptions
+                )
 
             }
             true
         }
 
 
-        homeViewModelFactory = HomeViewModelFactory(
-            WeatherRepoImpl.getInstance(
-                WeatherRemoteDataSourceImpl.getInstance(),
-                WeatherLocalDataSourceImpl(this)
-
-            )
-        )
-
-        homeViewModel = ViewModelProvider(this,homeViewModelFactory).get(HomeViewModel::class.java)
-        
-        val response = homeViewModel.currentWeather
-        Log.d(TAG, "onCreate: ${response.value}")
-
-
-
-
-
-
-        initUi()
-
-
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        if (checkPermissions()) {
-            if (isLocationEnabled()) {
-
-            } else {
-
-                enableLocationService()
-            }
-
-        } else {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-                ), REQUEST_LOCATION_CODE
-            )
-        }
+    private fun isInitialSetupDone(): Boolean {
+        val sharedPreferences = getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
+        return sharedPreferences.contains(INITIAL_CHOICE)
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.nav_host_fragment, fragment)
-        transaction.commit()
-
-    }
-
-
-
-
-    private fun checkPermissions(): Boolean {
-
-        return checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED||
-                checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-
-    }
-
-
-    private fun isLocationEnabled(): Boolean {
-
-        val locationManager: LocationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-
-    }
-
-    private fun enableLocationService() {
-        Toast.makeText(this, "Turn On Location", Toast.LENGTH_LONG).show()
-        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-        startActivity(intent)
-    }
-
-
-    
-    private fun initUi(){
-        checkPermissions()
-        isLocationEnabled()
-        enableLocationService()
-
-
-    }
 
 
 
 
 }
+
+
+//        homeViewModelFactory = HomeViewModelFactory(
+//            WeatherRepoImpl.getInstance(
+//                WeatherRemoteDataSourceImpl.getInstance(),
+//                WeatherLocalDataSourceImpl(this)
+//
+//            )
+//        )
+//
+//        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
+//
+//        val response = homeViewModel.currentWeather
+//        Log.d(TAG, "response: ${response.value}")
+
+
+//    private fun checkPermissions(): Boolean {
+//
+//        return checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED||
+//                checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+//
+//    }
+
+
+//    private fun isLocationEnabled(): Boolean {
+//
+//        val locationManager: LocationManager =
+//            getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//
+//        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+//            LocationManager.NETWORK_PROVIDER
+//        )
+//
+//    }
+
+//    private fun enableLocationService() {
+//        Toast.makeText(this, "Turn On Location", Toast.LENGTH_LONG).show()
+//        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+//        startActivity(intent)
+//    }
+
+
+//    private fun initUi() {
+//        checkPermissions()
+//        isLocationEnabled()
+//        enableLocationService()
+//    }

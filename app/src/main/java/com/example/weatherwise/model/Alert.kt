@@ -4,10 +4,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "alerts_table")
+
+
+@Entity(tableName = "alert_table")
 data class Alert(
-    @PrimaryKey(autoGenerate = true)
-    val id : Int,
+
     val senderName: String,
     val event: String,
     val start: Long,

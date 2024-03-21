@@ -1,5 +1,6 @@
 package com.example.weatherwise.dp
 
+import android.util.Log
 import androidx.room.TypeConverter
 import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.CurrentWeather
@@ -8,6 +9,7 @@ import com.example.weatherwise.model.HourlyForecast
 import com.example.weatherwise.model.MinutelyForecast
 import com.example.weatherwise.model.WeatherDetails
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 
 object Converters {
@@ -24,14 +26,13 @@ object Converters {
     }
 
     @TypeConverter
-    fun fromWeatherDetails(weatherDetails: WeatherDetails) : String{
-        return Gson().toJson(weatherDetails)
-    }
-
-    @TypeConverter
     fun toWeatherDetails(json : String) : WeatherDetails{
         val listType = object :TypeToken<List<WeatherDetails>>() {}.type
         return Gson().fromJson(json,listType)
+    }
+    @TypeConverter
+    fun fromWeatherDetails(weatherDetails: WeatherDetails) : String{
+        return Gson().toJson(weatherDetails)
     }
 
 
@@ -69,13 +70,24 @@ object Converters {
     }
 
     @TypeConverter
-    fun toAlert(value: String): List<Alert> {
-        val listType = object : TypeToken<List<Alert>>() {}.type
-        return Gson().fromJson(value, listType)
+    fun toAlert(value: String): List<Alert>? {
+        return try {
+            val listType = object : TypeToken<List<Alert>>() {}.type
+            Gson().fromJson(value, listType)
+        } catch (e: JsonSyntaxException) {
+            Log.e("Converters", "Error parsing JSON to Alert list: $e")
+            null
+        }
     }
 
     @TypeConverter
-    fun fromAlert(list: List<Alert>): String {
-        return Gson().toJson(list)
+    fun fromAlert(list: List<Alert>?): String {
+        return if(list != null){
+            Gson().toJson(list)
+        }
+        else{
+            "The Alert is null"
+        }
     }
+
 }

@@ -30,6 +30,7 @@ class WeatherRemoteDataSourceImpl : WeatherRemoteDataSource {
         units: String
     ): WeatherResponse {
         val response = weatherService.getWeather(lat = lat,lon = lon, lang = language,units = units)
+        Log.d(TAG, "getCurrentWeatherFromRemote: $response ")
         return response
     }
 

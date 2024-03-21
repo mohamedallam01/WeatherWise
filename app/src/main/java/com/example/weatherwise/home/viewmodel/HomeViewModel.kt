@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -37,9 +38,11 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
              _repo.getWeatherResponse().collect{
                 _currentWeather.postValue(it)
+                 Log.d(TAG, "getCurrentWeather: ${currentWeather.value}")
             }
 
-            Log.d(TAG, "getCurrentWeather: $currentWeather")
+            }
+
 
         }
 

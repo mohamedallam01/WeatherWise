@@ -25,7 +25,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val desc = intent.getStringExtra(ALERT_DESC)
         val bigTextStyle = NotificationCompat.BigTextStyle().bigText(desc)
         val appIntent = Intent(context,MainActivity::class.java)
-        val pendingIntent =PendingIntent.getActivity(context,0,appIntent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent =PendingIntent.getActivity(context,0,appIntent,PendingIntent.FLAG_IMMUTABLE)
 
         Log.d(TAG, "onReceive: $desc")
 

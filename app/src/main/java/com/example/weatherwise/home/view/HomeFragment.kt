@@ -1,9 +1,6 @@
 package com.example.weatherwise.home.view
 
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -12,31 +9,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
+
 import com.example.weatherwise.REQUEST_LOCATION_CODE
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
-import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class HomeFragment : Fragment() {
 
@@ -45,18 +38,24 @@ class HomeFragment : Fragment() {
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var geocoder : MutableList<Address>
-    private lateinit var progressBar : ProgressBar
-    private lateinit var tvAddress :TextView
-    private lateinit var tvTempDegree :TextView
-    private lateinit var tvMain :TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var tvAddress: TextView
+    private lateinit var tvTempDegree: TextView
+    private lateinit var tvMain: TextView
+    private lateinit var tvHumidity: TextView
+    private lateinit var tvWindSpeed: TextView
+    private lateinit var tvPressure: TextView
+    private lateinit var tvClouds: TextView
+    private lateinit var cvDetails: CardView
     private lateinit var homeHourlyAdapter: HomeHourlyAdapter
-    private lateinit var rvHourly : RecyclerView
-    private lateinit var rvDaily : RecyclerView
+    private lateinit var rvHourly: RecyclerView
+    private lateinit var rvDaily: RecyclerView
     private lateinit var homeDailyAdapter: HomeDailyAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d(TAG, "onCreate: ")
     }
 
     override fun onCreateView(
@@ -64,6 +63,8 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+
+        Log.d(TAG, "onCreateView: ")
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -71,21 +72,31 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
+
+        Log.d(TAG, "onViewCreated: ")
         progressBar = view.findViewById(R.id.progress_Bar)
         tvAddress = view.findViewById(R.id.tv_address)
         tvTempDegree = view.findViewById(R.id.tv_temp_degree)
         tvMain = view.findViewById(R.id.tv_main)
         rvHourly = view.findViewById(R.id.rv_hourly)
         rvDaily = view.findViewById(R.id.rv_daily)
+        tvHumidity = view.findViewById(R.id.tv_humidity_desc)
+        tvWindSpeed = view.findViewById(R.id.tv_wind_speed_desc)
+        tvPressure = view.findViewById(R.id.tv_pressure_desc)
+        tvClouds = view.findViewById(R.id.tv_clouds_desc)
+        cvDetails = view.findViewById(R.id.cv_details)
+        cvDetails.visibility = View.GONE
 
         homeHourlyAdapter = HomeHourlyAdapter(requireContext())
         rvHourly.adapter = homeHourlyAdapter
-        rvHourly.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL,false)
+        rvHourly.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         homeDailyAdapter = HomeDailyAdapter(requireContext())
         rvDaily.adapter = homeDailyAdapter
-        rvDaily.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL,false)
-
+        rvDaily.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        getFreshLocation()
         homeViewModelFactory = HomeViewModelFactory(
             WeatherRepoImpl.getInstance(
                 WeatherRemoteDataSourceImpl.getInstance(),
@@ -94,14 +105,55 @@ class HomeFragment : Fragment() {
             )
         )
 
-        val activity = requireActivity()
+        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
 
-        Log.d(TAG, "The Activity is: ${activity.title} ")
+        val result = homeViewModel.currentWeather.value
+        Log.d(TAG, "result: $result ")
+
+//            lifecycleScope.launch {
+//                homeViewModel.currentWeather.collectLatest { result ->
+//
+//                    when (result) {
+//                        is ApiState.Loading -> {
+//                            progressBar.visibility = View.VISIBLE
+//                        }
+//
+//                        is ApiState.Success -> {
+//                            progressBar.visibility = View.GONE
+//                            Log.d(TAG, "Success Result: ${result.data.alerts} ")
+//                            setHomeData(result.data)
+//                            homeHourlyAdapter.submitList(result.data.hourly)
+//                            homeDailyAdapter.submitList(result.data.daily)
+//                        }
+//
+//                        is ApiState.Failure -> {
+//                            progressBar.visibility = View.GONE
+//                            Log.d(TAG, "Exception is: ${result.msg}")
+//                            Toast.makeText(
+//                                requireActivity(),
+//                                result.msg.toString(),
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//                        }
+//
+//
+//                    }
+//                }
+//
+//
+//            }
 
 
-
-        homeViewModel = ViewModelProvider(this,homeViewModelFactory).get(HomeViewModel::class.java)
-
+        lifecycleScope.launch {
+            homeViewModel.currentWeather.observe(viewLifecycleOwner) { weatherResponse ->
+                weatherResponse?.let {
+                    Log.d(TAG, "currentWeatherFromDatabase: ${it} ")
+                    progressBar.visibility = View.GONE
+                    setHomeData(it)
+                    homeHourlyAdapter.submitList(it.hourly)
+                    homeDailyAdapter.submitList(it.daily)
+                }
+            }
         getFreshLocation()
 
 
@@ -145,49 +197,37 @@ class HomeFragment : Fragment() {
 //        }
 
 
-
     }
 
-    private fun setHomeData(weatherResponse: WeatherResponse){
+    private fun setHomeData(weatherResponse: WeatherResponse) {
         val address = weatherResponse.timezone
         val tempDegree = weatherResponse.current.temp
         val main = weatherResponse.current.weather[0].main
+        val humidity = weatherResponse.current.humidity
+        val windSpeed = weatherResponse.current.wind_speed
+        val pressure = weatherResponse.current.pressure
+        val clouds = weatherResponse.current.clouds
 
-
+        cvDetails.visibility = View.VISIBLE
         tvAddress.text = address
         tvTempDegree.text = "$tempDegree °C"
         tvMain.text = main
+        tvHumidity.text = humidity.toString()
+        tvWindSpeed.text = windSpeed.toString()
+        tvPressure.text = pressure.toString()
+        tvClouds.text = clouds.toString()
 
 
-    }
-
-
-
-
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == REQUEST_LOCATION_CODE) {
-            if (grantResults.size > 1 && grantResults.get(0) == PackageManager.PERMISSION_GRANTED) {
-                getFreshLocation()
-            }
-
-        }
     }
 
 
     @SuppressLint("MissingPermission")
     fun getFreshLocation() {
 
+
         Log.d(TAG, "getFreshLocation: ")
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationProviderClient.requestLocationUpdates(
             com.google.android.gms.location.LocationRequest.Builder(0).apply {
                 setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -206,8 +246,9 @@ class HomeFragment : Fragment() {
 
                     Log.d(TAG, "Latitude: $latitude, Longitude: $longitude ")
 
-                    homeViewModel.setCurrentLocation(longitude, latitude, "en", "metric")
-                    //val response = homeViewModel.getCurrentWeather(latitude, longitude, "en", "metric")
+                    homeViewModel.setCurrentLocation("33.44", "-94.04", "en", "metric")
+                    val response = homeViewModel.currentWeather.value
+                    Log.d(TAG, "result: $response ")
 
 
 //                    geocoder =
@@ -223,5 +264,6 @@ class HomeFragment : Fragment() {
 
         )
     }
+
 
 }

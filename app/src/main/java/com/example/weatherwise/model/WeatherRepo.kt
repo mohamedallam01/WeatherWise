@@ -11,4 +11,10 @@ interface WeatherRepo {
                                   lon: String,
                                   language: String,
                                   units: String):Flow<WeatherResponse>
+
+
+     fun getAlerts() : Flow<List<Alert>>
+
+     suspend fun insertAlert(alert: Alert)
+     suspend fun deleteAlert(alert: Alert)
 }

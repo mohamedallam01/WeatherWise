@@ -31,4 +31,6 @@
     <string name="wind_speed">Wind Speed</string>
     <string name="pressure">Pressure</string>
     <string name="clouds">Clouds</string>
+    <string name="gps">GPS</string>
+    <string name="location">Location</string>
 </resources>
