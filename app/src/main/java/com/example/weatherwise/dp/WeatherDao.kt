@@ -20,12 +20,12 @@ interface WeatherDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWeatherResponse(weatherResponse: WeatherResponse)
 
-//    @Insert(onConflict = OnConflictStrategy.IGNORE)
-//    suspend fun insertAlert(alert: Alert)
-//
-//    @Query("SELECT * from alerts_table")
-//    suspend fun getAlert(): List<Alert>
-//
-//    @Delete
-//    suspend fun deleteAlert(alert: Alert)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAlert(alert: Alert)
+
+    @Query("SELECT * from alert_table")
+     fun getAlerts(): Flow<List<Alert>>
+
+    @Delete
+    suspend fun deleteAlert(alert: Alert)
 }

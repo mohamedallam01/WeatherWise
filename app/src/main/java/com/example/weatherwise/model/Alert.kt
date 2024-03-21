@@ -5,6 +5,8 @@ import androidx.room.PrimaryKey
 
 
 
+
+@Entity(tableName = "alert_table")
 data class Alert(
 
     val senderName: String,
