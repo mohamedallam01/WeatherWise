@@ -1,38 +1,24 @@
 package com.example.weatherwise
 
 
-import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
-import android.content.DialogInterface.BUTTON_POSITIVE
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.location.LocationManagerCompat.isLocationEnabled
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
-import com.bumptech.glide.Glide.init
-import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
-import com.example.weatherwise.home.view.HomeFragment
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
-import com.example.weatherwise.model.WeatherRepoImpl
-import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.ChecksManager.enableLocationService
 import com.example.weatherwise.util.INITIAL_CHOICE
@@ -40,7 +26,7 @@ import com.example.weatherwise.util.INITIAL_PREFS
 import com.example.weatherwise.util.InitialSetupDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-const val REQUEST_LOCATION_CODE = 2005
+const val REQUEST_CODE = 2005
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var initialSetupDialog: InitialSetupDialog
     lateinit var progressBar: ProgressBar
 
+    private var isPermissionGranted = false
+
 
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var homeViewModelFactory: HomeViewModelFactory
@@ -62,65 +50,121 @@ class MainActivity : AppCompatActivity() {
 
 
         fragment = findViewById(R.id.nav_host_fragment)
-        //progressBar = findViewById(R.id.progress_Bar)
+        progressBar = findViewById(R.id.progress_Bar)
+        progressBar.visibility = View.GONE
 
         Log.d(TAG, "onCreate: ")
 
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart: ")
 
         if (!::initialSetupDialog.isInitialized) {
-            //progressBar.visibility = View.GONE
             initialSetupDialog = InitialSetupDialog()
             initialSetupDialog.setPositiveButton(DialogInterface.OnClickListener { dialogInterface, _ ->
                 if (ChecksManager.isLocationIsEnabled(this)) {
+                    progressBar.visibility = View.VISIBLE
+                    Log.d(TAG, "First initMainActivity: 11111111111 ")
                     initMainActivity()
                 } else {
                     enableLocationService(this)
                 }
             })
 
-            if(!isInitialSetupDone()){
-                initialSetupDialog.show(supportFragmentManager, "InitialSetupDialog")
+            if (ChecksManager.checkPermission(this) && ChecksManager.notificationPermission(this)) {
+                if (!isInitialSetupDone()) {
+                    initialSetupDialog.show(supportFragmentManager, "InitialSetupDialog")
+                }
+            } else {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.POST_NOTIFICATIONS,
+                    ), REQUEST_CODE
+                )
             }
-
         }
+        else if (isPermissionGranted && isInitialSetupDone()){
+            progressBar.visibility = View.VISIBLE
+            Log.d(TAG, "Second initMainActivity: 222222222 ")
+            initMainActivity()
+        }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: ")
 
 
     }
+
+    override fun onPause() {
+        super.onPause()
+
+        Log.d(TAG, "onPause: ")
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.d(TAG, "onStop: ")
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE) {
+            val locationGranted = grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+            val notificationGranted = grantResults.size > 1 &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED
+
+            if (locationGranted && notificationGranted && !isInitialSetupDone()) {
+                isPermissionGranted = true
+                initialSetupDialog.show(supportFragmentManager, "InitialSetupDialog")
+
+            }
+        }
+        
+    }
+
     private fun initMainActivity() {
 
 
-            bottomNavBar = findViewById(R.id.bottom_nav_view)
+        bottomNavBar = findViewById(R.id.bottom_nav_view)
 
-            navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment)
 
-            NavigationUI.setupWithNavController(bottomNavBar, navController)
+        NavigationUI.setupWithNavController(bottomNavBar, navController)
 
-            val navOptions = NavOptions.Builder()
-                .setRestoreState(true)
-                .setPopUpTo(R.id.home, false, true)
-                .build()
+        val navOptions = NavOptions.Builder()
+            .setRestoreState(true)
+            .setPopUpTo(R.id.home, false, true)
+            .build()
 
-            bottomNavBar.setOnItemSelectedListener { item ->
-                when (item.itemId) {
-                    R.id.home -> navController.navigate(R.id.home_graph, null, navOptions)
-                    R.id.alert -> navController.navigate(R.id.alert_graph, null, navOptions)
-                    R.id.favorite -> navController.navigate(R.id.favorite_graph, null, navOptions)
-                    R.id.settings -> navController.navigate(
-                        R.id.preferences_graph,
-                        null,
-                        navOptions
-                    )
+        bottomNavBar.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.home -> navController.navigate(R.id.home_graph, null, navOptions)
+                R.id.alert -> navController.navigate(R.id.alert_graph, null, navOptions)
+                R.id.favorite -> navController.navigate(R.id.favorite_graph, null, navOptions)
+                R.id.settings -> navController.navigate(
+                    R.id.preferences_graph,
+                    null,
+                    navOptions
+                )
 
-                }
-                true
             }
+            true
+        }
 
 
     }
@@ -129,6 +173,9 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
         return sharedPreferences.contains(INITIAL_CHOICE)
     }
+
+
+
 
 
 }

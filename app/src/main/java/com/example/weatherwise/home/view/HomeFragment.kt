@@ -142,19 +142,17 @@ class HomeFragment : Fragment() {
 //            }
 
 
-
-            lifecycleScope.launch {
-                homeViewModel.currentWeather.observe(viewLifecycleOwner) { weatherResponse ->
-                    weatherResponse?.let {
-                        Log.d(TAG, "currentWeatherFromDatabase: ${it} ")
-                        progressBar.visibility = View.GONE
-                        setHomeData(it)
-                        homeHourlyAdapter.submitList(it.hourly)
-                        homeDailyAdapter.submitList(it.daily)
-                    }
+        lifecycleScope.launch {
+            homeViewModel.currentWeather.observe(viewLifecycleOwner) { weatherResponse ->
+                weatherResponse?.let {
+                    Log.d(TAG, "currentWeatherFromDatabase: ${it} ")
+                    progressBar.visibility = View.GONE
+                    setHomeData(it)
+                    homeHourlyAdapter.submitList(it.hourly)
+                    homeDailyAdapter.submitList(it.daily)
                 }
             }
-
+        }
 
 
     }
@@ -184,8 +182,10 @@ class HomeFragment : Fragment() {
     @SuppressLint("MissingPermission")
     fun getFreshLocation() {
 
+
         Log.d(TAG, "getFreshLocation: ")
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationProviderClient.requestLocationUpdates(
             com.google.android.gms.location.LocationRequest.Builder(0).apply {
                 setPriority(Priority.PRIORITY_HIGH_ACCURACY)
