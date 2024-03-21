@@ -13,7 +13,7 @@ class WeatherRepoImpl private constructor(
     private val weatherRemoteDataSource: WeatherRemoteDataSource,
     private val weatherLocalDataSource: WeatherLocalDataSource
 ) : WeatherRepo {
-    
+
     private val TAG = "WeatherRepoImpl"
 
 
@@ -58,22 +58,18 @@ class WeatherRepoImpl private constructor(
             units = units
         )
 
-
-
-        if (weatherResponseFromRemote != null){
+        if (weatherResponseFromRemote != null) {
 
             try {
                 weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
                 Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
-            }
-            catch (exception :Exception){
+            } catch (exception: Exception) {
 
                 Log.d(TAG, "Exception: $exception ")
 
             }
 
-        }
-        else{
+        } else {
             Log.d(TAG, "getCurrentWeatherFromRemote: Null")
         }
         emit(weatherResponseFromRemote)
@@ -83,4 +79,16 @@ class WeatherRepoImpl private constructor(
         emit(weatherResponseFromRemote)
 
     }.flowOn(Dispatchers.IO)
+
+//    override fun getAlerts(): Flow<List<Alert>> {
+//        return weatherLocalDataSource.getAllAlerts()
+//    }
+//
+//    override suspend fun insertAlert(alert: Alert) {
+//        weatherLocalDataSource.insertAlert(alert)
+//    }
+//
+//    override suspend fun deleteAlert(alert: Alert) {
+//        weatherLocalDataSource.deleteAlert(alert)
+//    }
 }

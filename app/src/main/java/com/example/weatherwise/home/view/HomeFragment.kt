@@ -16,8 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
-
-import com.example.weatherwise.REQUEST_LOCATION_CODE
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
@@ -154,20 +152,7 @@ class HomeFragment : Fragment() {
                     homeDailyAdapter.submitList(it.daily)
                 }
             }
-        getFreshLocation()
-
-
-        val currentWeatherFromDatabase = homeViewModel.currentWeather
-
-        Log.d(TAG, "currentWeatherFromDatabase: $currentWeatherFromDatabase ")
-
-
-        currentWeatherFromDatabase.observe(viewLifecycleOwner){
-            progressBar.visibility = View.GONE
-            setHomeData(it)
-            homeHourlyAdapter.submitList(it.hourly)
-            homeDailyAdapter.submitList(it.daily)
-        }
+            getFreshLocation()
 //        lifecycleScope.launch {
 //            homeViewModel.currentWeather.collectLatest {
 //                    result ->
@@ -197,58 +182,60 @@ class HomeFragment : Fragment() {
 //        }
 
 
-    }
-
-    private fun setHomeData(weatherResponse: WeatherResponse) {
-        val address = weatherResponse.timezone
-        val tempDegree = weatherResponse.current.temp
-        val main = weatherResponse.current.weather[0].main
-        val humidity = weatherResponse.current.humidity
-        val windSpeed = weatherResponse.current.wind_speed
-        val pressure = weatherResponse.current.pressure
-        val clouds = weatherResponse.current.clouds
-
-        cvDetails.visibility = View.VISIBLE
-        tvAddress.text = address
-        tvTempDegree.text = "$tempDegree °C"
-        tvMain.text = main
-        tvHumidity.text = humidity.toString()
-        tvWindSpeed.text = windSpeed.toString()
-        tvPressure.text = pressure.toString()
-        tvClouds.text = clouds.toString()
-
+        }
 
     }
 
+        private fun setHomeData(weatherResponse: WeatherResponse) {
+            val address = weatherResponse.timezone
+            val tempDegree = weatherResponse.current.temp
+            val main = weatherResponse.current.weather[0].main
+            val humidity = weatherResponse.current.humidity
+            val windSpeed = weatherResponse.current.wind_speed
+            val pressure = weatherResponse.current.pressure
+            val clouds = weatherResponse.current.clouds
 
-    @SuppressLint("MissingPermission")
-    fun getFreshLocation() {
+            cvDetails.visibility = View.VISIBLE
+            tvAddress.text = address
+            tvTempDegree.text = "$tempDegree °C"
+            tvMain.text = main
+            tvHumidity.text = humidity.toString()
+            tvWindSpeed.text = windSpeed.toString()
+            tvPressure.text = pressure.toString()
+            tvClouds.text = clouds.toString()
 
 
-        Log.d(TAG, "getFreshLocation: ")
-        fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(requireActivity())
-        fusedLocationProviderClient.requestLocationUpdates(
-            com.google.android.gms.location.LocationRequest.Builder(0).apply {
-                setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            }.build(),
-            object : LocationCallback() {
+        }
 
-                override fun onLocationResult(locationResult: LocationResult) {
-                    super.onLocationResult(locationResult)
 
-                    val location = locationResult.lastLocation
+        @SuppressLint("MissingPermission")
+        fun getFreshLocation() {
 
-                    Log.d(TAG, "onLocationResult: ")
 
-                    val longitude = location?.longitude.toString()
-                    val latitude = location?.latitude.toString()
+            Log.d(TAG, "getFreshLocation: ")
+            fusedLocationProviderClient =
+                LocationServices.getFusedLocationProviderClient(requireActivity())
+            fusedLocationProviderClient.requestLocationUpdates(
+                com.google.android.gms.location.LocationRequest.Builder(0).apply {
+                    setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                }.build(),
+                object : LocationCallback() {
 
-                    Log.d(TAG, "Latitude: $latitude, Longitude: $longitude ")
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        super.onLocationResult(locationResult)
 
-                    homeViewModel.setCurrentLocation("33.44", "-94.04", "en", "metric")
-                    val response = homeViewModel.currentWeather.value
-                    Log.d(TAG, "result: $response ")
+                        val location = locationResult.lastLocation
+
+                        Log.d(TAG, "onLocationResult: ")
+
+                        val longitude = location?.longitude.toString()
+                        val latitude = location?.latitude.toString()
+
+                        Log.d(TAG, "Latitude: $latitude, Longitude: $longitude ")
+
+                        homeViewModel.setCurrentLocation("33.44", "-94.04", "en", "metric")
+                        val response = homeViewModel.currentWeather.value
+                        Log.d(TAG, "result: $response ")
 
 
 //                    geocoder =
@@ -256,14 +243,15 @@ class HomeFragment : Fragment() {
 //
 //
 //                     Log.d(TAG, "Geocoder: $geocoder")
-                    fusedLocationProviderClient.removeLocationUpdates(this)
+                        fusedLocationProviderClient.removeLocationUpdates(this)
 
-                }
-            },
-            Looper.myLooper()
+                    }
+                },
+                Looper.myLooper()
 
-        )
+            )
+        }
+
+
     }
 
-
-}

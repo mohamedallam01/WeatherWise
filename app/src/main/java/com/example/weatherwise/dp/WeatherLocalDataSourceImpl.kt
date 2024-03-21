@@ -23,18 +23,18 @@ class WeatherLocalDataSourceImpl(context: Context) : WeatherLocalDataSource {
           weatherDao.insertWeatherResponse(weatherResponse)
     }
 
-    override suspend fun insertAlert(alert: Alert) {
-        weatherDao.insertAlert(alert)
-    }
-
-    override fun getAllAlerts(): Flow<List<Alert>> {
-        return weatherDao.getAlerts()
-    }
-
-    override suspend fun deleteAlert(alert: Alert) {
-        weatherDao.deleteAlert(alert)
-        
-    }
+//    override suspend fun insertAlert(alert: Alert) {
+//        weatherDao.insertAlert(alert)
+//    }
+//
+//    override fun getAllAlerts(): Flow<List<Alert>> {
+//        return weatherDao.getAlerts()
+//    }
+//
+//    override suspend fun deleteAlert(alert: Alert) {
+//        weatherDao.deleteAlert(alert)
+//
+//    }
 
 
 }

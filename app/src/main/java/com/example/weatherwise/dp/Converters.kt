@@ -90,4 +90,9 @@ object Converters {
         }
     }
 
+    fun fromTag(list: List<String>): String {
+        val gson = Gson()
+        return gson.toJson(list)
+    }
+
 }
