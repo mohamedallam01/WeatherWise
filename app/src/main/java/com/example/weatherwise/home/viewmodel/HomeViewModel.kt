@@ -41,6 +41,7 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
                  Log.d(TAG, "getCurrentWeather: ${currentWeather.value}")
             }
 
+            }
 
 
         }

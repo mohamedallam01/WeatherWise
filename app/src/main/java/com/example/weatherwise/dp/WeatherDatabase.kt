@@ -9,6 +9,7 @@ import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.WeatherResponse
 
 @Database([WeatherResponse::class,Alert::class], version = 1)
+
 @TypeConverters(Converters::class)
 abstract class WeatherDatabase : RoomDatabase() {
 

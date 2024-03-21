@@ -9,8 +9,10 @@ interface WeatherLocalDataSource {
    fun getWeatherResponse() : Flow<WeatherResponse>
    suspend fun insertWeatherResponse(weatherResponse: WeatherResponse)
 
+
    suspend fun insertAlert(alert: Alert)
    fun getAllAlerts() : Flow<List<Alert>>
 
    suspend fun deleteAlert(alert: Alert)
+
 }

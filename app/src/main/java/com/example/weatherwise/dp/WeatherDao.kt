@@ -26,6 +26,6 @@ interface WeatherDao {
     @Query("SELECT * from alert_table")
      fun getAlerts(): Flow<List<Alert>>
 
-    @Delete
-    suspend fun deleteAlert(alert: Alert)
+   @Delete
+   suspend fun deleteAlert(alert: Alert)
 }

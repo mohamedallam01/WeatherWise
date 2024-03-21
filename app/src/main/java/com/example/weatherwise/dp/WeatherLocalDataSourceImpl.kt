@@ -33,6 +33,7 @@ class WeatherLocalDataSourceImpl(context: Context) : WeatherLocalDataSource {
 
     override suspend fun deleteAlert(alert: Alert) {
         weatherDao.deleteAlert(alert)
+        
     }
 
 

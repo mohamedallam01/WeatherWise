@@ -36,7 +36,6 @@ object Converters {
     }
 
 
-
 //    @TypeConverter
 //    fun toMinutelyForecast(value: String): List<MinutelyForecast> {
 //        val listType = object : TypeToken<List<MinutelyForecast>>() {}.type
@@ -90,8 +89,5 @@ object Converters {
             "The Alert is null"
         }
     }
-
-
-
 
 }
