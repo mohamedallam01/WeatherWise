@@ -20,6 +20,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
 import com.example.weatherwise.alert.ALERT_DESC
 import com.example.weatherwise.alert.CHANNEL_ID
@@ -28,6 +30,8 @@ import com.example.weatherwise.alert.NotificationReceiver
 import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
+import com.example.weatherwise.home.view.HomeHourlyAdapter
+import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
@@ -70,6 +74,9 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     val calender = Calendar.getInstance()
 
+    private lateinit var rvAlerts : RecyclerView
+    private lateinit var alertAdapter : AlertAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +96,14 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         super.onViewCreated(view, savedInstanceState)
 
         fabAddAlert = view.findViewById(R.id.fab_add_alert)
+        rvAlerts = view.findViewById(R.id.rv_alerts)
+
+        alertAdapter = AlertAdapter(requireContext())
+        rvAlerts.adapter = alertAdapter
+        rvAlerts.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+
+
 
         alertViewModelFactory = AlertViewModelFactory(
             WeatherRepoImpl.getInstance(
@@ -101,8 +116,6 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
         alertViewModel =
             ViewModelProvider(this, alertViewModelFactory).get(AlertViewModel::class.java)
-
-
 
         pickDate()
 
@@ -158,9 +171,9 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
-        alertViewModel.setAlertLocation("30.3153527", "31.3246404", "en", "metric")
+        alertViewModel.setAlertLocation("33.44", "-94.04", "en", "metric")
         lifecycleScope.launch {
-            alertViewModel.alertWeather.collectLatest { result ->
+            alertViewModel.alertWeather.collect { result ->
 
                 when (result) {
                     is ApiState.Loading -> {
@@ -169,6 +182,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
                     is ApiState.Success -> {
                         //progressBar.visibility = View.GONE
+
                         Log.d(TAG, "Success Result: ${result.data.alerts} ")
                         val goodWeather = "Good Weather, Enjoy"
 
@@ -181,7 +195,35 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                                 result.data.alerts[0].description
                             }
 
+                        val currentAlert = result.data.alerts?.get(0)
+
+                        if ( currentAlert != null){
+                            alertViewModel.insertAlert(currentAlert)
+
+                        }
+                        else{
+                            val emptyAlert = Alert(senderName = "No Alerts", event = "No Events", start = 0, end = 0, description = "Good Weather Enjoy")
+                            alertViewModel.insertAlert(emptyAlert)
+                        }
+
+
+
+
                         withContext(Dispatchers.Main) {
+                            Log.d(TAG, "current Alert: ${alertViewModel.getAllAlerts()} ")
+                            lifecycleScope.launch {
+                                if(result.data.alerts.isNullOrEmpty()){
+                                    alertViewModel.currentAlert.collectLatest{
+                                        alertAdapter.submitList(it)
+                                    }
+
+
+                                }
+                                else{
+                                    alertAdapter.submitList(result.data.alerts)
+                                }
+                            }
+
 
                             broadcastIntent = Intent(
                                 requireActivity().applicationContext,

@@ -36,18 +36,14 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {
-             _repo.getWeatherResponse().collect{
+            _repo.getWeatherResponse().collect {
                 _currentWeather.postValue(it)
-                 Log.d(TAG, "getCurrentWeather: ${currentWeather.value}")
+                Log.d(TAG, "getCurrentWeather From database: ${currentWeather.value}")
             }
-
-            }
-
 
         }
 
 
     }
-
 
 }

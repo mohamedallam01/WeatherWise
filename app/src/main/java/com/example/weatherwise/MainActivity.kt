@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         progressBar.visibility = View.GONE
 
         Log.d(TAG, "onCreate: ")
-
+        initMainActivity()
 
     }
 
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                 if (ChecksManager.isLocationIsEnabled(this)) {
                     progressBar.visibility = View.VISIBLE
                     Log.d(TAG, "First initMainActivity: 11111111111 ")
-                    initMainActivity()
+
                 } else {
                     enableLocationService(this)
                 }
