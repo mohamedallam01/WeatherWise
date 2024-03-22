@@ -76,12 +76,21 @@ class WeatherRepoImpl private constructor(
 
     }.flowOn(Dispatchers.IO)
 
+
     override fun getAllAlerts(): Flow<List<Alert>> {
          return weatherLocalDataSource.getAllAlerts()
     }
 
+    override fun getAllFavorites(): Flow<List<FavoriteWeather>> {
+       return weatherLocalDataSource.getAllFavorites()
+    }
+
     override suspend fun insertAlert(alert: Alert?) {
         weatherLocalDataSource.insertAlert(alert)
+    }
+
+    override suspend fun insertFavorite(favoriteWeather: FavoriteWeather) {
+        weatherLocalDataSource.insertFavorite(favoriteWeather)
     }
 
     override suspend fun deleteAlert(alert: Alert) {

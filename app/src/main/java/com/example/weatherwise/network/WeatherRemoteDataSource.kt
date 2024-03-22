@@ -1,5 +1,6 @@
 package com.example.weatherwise.network
 
+import com.example.weatherwise.model.FavoriteWeather
 import com.example.weatherwise.model.WeatherResponse
 import retrofit2.Response
 
