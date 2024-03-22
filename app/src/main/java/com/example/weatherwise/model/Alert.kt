@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 data class Alert(
 
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Long = 0,
     val senderName: String,
     val event: String,
     val start: Long,

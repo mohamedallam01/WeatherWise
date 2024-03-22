@@ -3,7 +3,6 @@ package com.example.weatherwise.model
 import android.util.Log
 import com.example.weatherwise.dp.WeatherLocalDataSource
 import com.example.weatherwise.network.WeatherRemoteDataSource
-import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -72,23 +71,20 @@ class WeatherRepoImpl private constructor(
         } else {
             Log.d(TAG, "getCurrentWeatherFromRemote: Null")
         }
-        emit(weatherResponseFromRemote)
-
-
         weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
         emit(weatherResponseFromRemote)
 
     }.flowOn(Dispatchers.IO)
 
-//    override fun getAlerts(): Flow<List<Alert>> {
-//        return weatherLocalDataSource.getAllAlerts()
-//    }
-//
-//    override suspend fun insertAlert(alert: Alert) {
-//        weatherLocalDataSource.insertAlert(alert)
-//    }
-//
-//    override suspend fun deleteAlert(alert: Alert) {
-//        weatherLocalDataSource.deleteAlert(alert)
-//    }
+    override fun getAllAlerts(): Flow<List<Alert>> {
+         return weatherLocalDataSource.getAllAlerts()
+    }
+
+    override suspend fun insertAlert(alert: Alert?) {
+        weatherLocalDataSource.insertAlert(alert)
+    }
+
+    override suspend fun deleteAlert(alert: Alert) {
+        weatherLocalDataSource.deleteAlert(alert)
+    }
 }

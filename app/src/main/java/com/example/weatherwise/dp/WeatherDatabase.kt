@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.WeatherResponse
 
-@Database([WeatherResponse::class], version = 1)
+@Database([WeatherResponse::class,Alert::class], version = 2)
 
 @TypeConverters(Converters::class)
 abstract class WeatherDatabase : RoomDatabase() {
