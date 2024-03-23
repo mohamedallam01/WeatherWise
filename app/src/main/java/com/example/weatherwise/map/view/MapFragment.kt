@@ -40,8 +40,8 @@ class MapFragment : Fragment(), MapEventsReceiver{
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Configuration.getInstance().load(context,androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext()))
 
+        Configuration.getInstance().load(context,androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext()))
         sharedLocationViewModel = ViewModelProvider(requireActivity()).get(SharedLocationViewModel::class.java)
 
 

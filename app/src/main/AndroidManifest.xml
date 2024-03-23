@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -23,6 +23,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WeatherWise"
         tools:targetApi="31">
+        <service
+            android:name=".alert.view.DialogService"
+            android:exported="false">
+
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
