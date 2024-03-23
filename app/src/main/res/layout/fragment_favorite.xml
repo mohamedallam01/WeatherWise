@@ -26,4 +26,13 @@
         android:src="@drawable/baseline_add_box_24"
         android:contentDescription="@string/add_alert" />
 
+    <ProgressBar
+        android:id="@+id/progress_Bar_favorite"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

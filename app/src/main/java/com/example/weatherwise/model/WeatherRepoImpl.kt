@@ -60,7 +60,7 @@ class WeatherRepoImpl private constructor(
         if (weatherResponseFromRemote != null) {
 
             try {
-                weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
+                //weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
                 Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
             } catch (exception: Exception) {
 
@@ -71,7 +71,6 @@ class WeatherRepoImpl private constructor(
         } else {
             Log.d(TAG, "getCurrentWeatherFromRemote: Null")
         }
-        weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
         emit(weatherResponseFromRemote)
 
     }.flowOn(Dispatchers.IO)

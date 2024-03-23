@@ -10,6 +10,7 @@ import android.widget.Button
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.weatherwise.R
+import com.example.weatherwise.SharedLocationViewModel
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
@@ -34,11 +35,15 @@ class MapFragment : Fragment(), MapEventsReceiver{
     private lateinit var mapViewModel: MapViewModel
     private lateinit var mapViewModelFactory: MapViewModelFactory
     private lateinit var btnConfirm : Button
+    private lateinit var sharedLocationViewModel: SharedLocationViewModel
     private val TAG = "MapFragment"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Configuration.getInstance().load(context,androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext()))
+
+        sharedLocationViewModel = ViewModelProvider(requireActivity()).get(SharedLocationViewModel::class.java)
+
 
     }
 
@@ -106,6 +111,10 @@ class MapFragment : Fragment(), MapEventsReceiver{
             val latitude = geoPoint.latitude
             val longitude = geoPoint.longitude
 
+            sharedLocationViewModel.updateLocation(latitude, longitude)
+
+            Log.d(TAG, "latitude from shared view model: ${sharedLocationViewModel.latitude.value} ")
+            Log.d(TAG, "longitude from shared view model: ${sharedLocationViewModel.longitude.value} ")
 
             val fav = FavoriteWeather(lat =latitude, lon = longitude, timezone = "Cairo")
 

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -17,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class FavoriteAdapter (private val context: Context) :
+class FavoriteAdapter (private val context: Context, private val moveToHome : () -> Unit) :
     ListAdapter<FavoriteWeather, FavoriteViewHolder>(FavoriteDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteViewHolder {
@@ -30,6 +31,9 @@ class FavoriteAdapter (private val context: Context) :
         val favoriteWeather: FavoriteWeather = getItem(position)
 
         holder.favoriteAddress.text = favoriteWeather.timezone
+        holder.cvFavorite.setOnClickListener {
+            moveToHome()
+        }
 
 
 
@@ -41,6 +45,7 @@ class FavoriteAdapter (private val context: Context) :
 class FavoriteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     val favoriteAddress: TextView = itemView.findViewById(R.id.tv_favorite_address)
+    val cvFavorite : CardView = itemView.findViewById(R.id.cv_favorite)
 
 
 }
