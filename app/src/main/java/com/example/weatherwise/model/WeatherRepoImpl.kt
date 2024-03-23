@@ -60,7 +60,7 @@ class WeatherRepoImpl private constructor(
         if (weatherResponseFromRemote != null) {
 
             try {
-                weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
+                //weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
                 Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
             } catch (exception: Exception) {
 
@@ -71,17 +71,25 @@ class WeatherRepoImpl private constructor(
         } else {
             Log.d(TAG, "getCurrentWeatherFromRemote: Null")
         }
-        weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
         emit(weatherResponseFromRemote)
 
     }.flowOn(Dispatchers.IO)
+
 
     override fun getAllAlerts(): Flow<List<Alert>> {
          return weatherLocalDataSource.getAllAlerts()
     }
 
+    override fun getAllFavorites(): Flow<List<FavoriteWeather>> {
+       return weatherLocalDataSource.getAllFavorites()
+    }
+
     override suspend fun insertAlert(alert: Alert?) {
         weatherLocalDataSource.insertAlert(alert)
+    }
+
+    override suspend fun insertFavorite(favoriteWeather: FavoriteWeather) {
+        weatherLocalDataSource.insertFavorite(favoriteWeather)
     }
 
     override suspend fun deleteAlert(alert: Alert) {

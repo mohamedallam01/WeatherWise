@@ -2,6 +2,7 @@ package com.example.weatherwise.dp
 
 import android.content.Context
 import com.example.weatherwise.model.Alert
+import com.example.weatherwise.model.FavoriteWeather
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +39,18 @@ class WeatherLocalDataSourceImpl(context: Context) : WeatherLocalDataSource {
     override suspend fun deleteAlert(alert: Alert) {
         weatherDao.deleteAlert(alert)
 
+    }
+
+    override suspend fun insertFavorite(favoriteWeather: FavoriteWeather) {
+
+
+        weatherDao.insertFavorite(favoriteWeather)
+
+
+    }
+
+    override fun getAllFavorites(): Flow<List<FavoriteWeather>> {
+        return weatherDao.getAllFavorites()
     }
 
 

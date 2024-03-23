@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".preferences.MapFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".map.view.MapFragment">
 
 
     <org.osmdroid.views.MapView
@@ -12,5 +13,15 @@
         android:layout_height="match_parent"
         android:clickable="true"
         android:focusable="true" />
+
+    <Button
+        android:id="@+id/btn_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/confirm"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

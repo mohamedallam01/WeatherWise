@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.weatherwise.model.Alert
+import com.example.weatherwise.model.FavoriteWeather
 import com.example.weatherwise.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,13 @@ interface WeatherDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAlert(alert: Alert)
+
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertFavorite(favoriteWeather: FavoriteWeather)
+
+    @Query("SELECT * from favorite_table")
+    fun getAllFavorites() : Flow<List<FavoriteWeather>>
 
     @Query("SELECT * from alert_table")
      fun getAlerts(): Flow<List<Alert>>

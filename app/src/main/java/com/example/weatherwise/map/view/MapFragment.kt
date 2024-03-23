@@ -1,16 +1,26 @@
-package com.example.weatherwise.preferences
+package com.example.weatherwise.map.view
 
-import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.weatherwise.R
+import com.example.weatherwise.SharedLocationViewModel
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
+import com.example.weatherwise.home.viewmodel.HomeViewModel
+import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
+import com.example.weatherwise.map.viewmodel.MapViewModel
+import com.example.weatherwise.map.viewmodel.MapViewModelFactory
+import com.example.weatherwise.model.FavoriteWeather
+import com.example.weatherwise.model.WeatherRepoImpl
+import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -22,11 +32,18 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 class MapFragment : Fragment(), MapEventsReceiver{
 
     private lateinit var mapView : MapView
+    private lateinit var mapViewModel: MapViewModel
+    private lateinit var mapViewModelFactory: MapViewModelFactory
+    private lateinit var btnConfirm : Button
+    private lateinit var sharedLocationViewModel: SharedLocationViewModel
     private val TAG = "MapFragment"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         Configuration.getInstance().load(context,androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext()))
+        sharedLocationViewModel = ViewModelProvider(requireActivity()).get(SharedLocationViewModel::class.java)
+
 
     }
 
@@ -43,6 +60,18 @@ class MapFragment : Fragment(), MapEventsReceiver{
 
 
         mapView = view.findViewById(R.id.map_view)
+        btnConfirm = view.findViewById(R.id.btn_confirm)
+
+
+        mapViewModelFactory = MapViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(requireContext())
+
+            )
+        )
+
+        mapViewModel = ViewModelProvider(this, mapViewModelFactory).get(MapViewModel::class.java)
 
         mapView.setBuiltInZoomControls(true)
         mapView.mapCenter
@@ -81,6 +110,18 @@ class MapFragment : Fragment(), MapEventsReceiver{
 
             val latitude = geoPoint.latitude
             val longitude = geoPoint.longitude
+
+            sharedLocationViewModel.updateLocation(latitude, longitude)
+
+            Log.d(TAG, "latitude from shared view model: ${sharedLocationViewModel.latitude.value} ")
+            Log.d(TAG, "longitude from shared view model: ${sharedLocationViewModel.longitude.value} ")
+
+            val fav = FavoriteWeather(lat =latitude, lon = longitude, timezone = "Cairo")
+
+            btnConfirm.setOnClickListener {
+                findNavController().navigate(R.id.action_mapFragment2_to_favoriteFragment)
+                mapViewModel.insertFavoriteWeather(fav)
+            }
 
             Log.d(TAG, "latitude: $latitude, longitude: $longitude")
 

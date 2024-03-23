@@ -14,7 +14,7 @@
     </fragment>
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.weatherwise.preferences.MapFragment"
+        android:name="com.example.weatherwise.map.view.MapFragment"
         android:label="fragment_map"
         tools:layout="@layout/fragment_map" />
 </navigation>
