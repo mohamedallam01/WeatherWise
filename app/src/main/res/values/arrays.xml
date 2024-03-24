@@ -25,8 +25,8 @@
         <item>English</item>
     </string-array>
     <string-array name="language_values">
-        <item>arabic</item>
-        <item>english</item>
+        <item>ar</item>
+        <item>en</item>
     </string-array>
     <!-- Reply Preference -->
     <string-array name="reply_entries">

@@ -28,6 +28,7 @@ import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.preferences.PREFS
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -42,9 +43,9 @@ const val LOCATION = "location"
 const val LATITUDE = "latitude"
 const val LONGITUDE = "longitude"
 const val LOCATION_UPDATED = "is_location_updated"
-const val KELVIN = "Kelvin"
-const val CELSIUS = "Celsius"
-const val FAHRENHEIT = "Fahrenheit"
+const val KELVIN = "kelvin"
+const val CELSIUS = "celsius"
+const val FAHRENHEIT = "fahrenheit"
 const val METRIC = "metric"
 const val STANDARD = "standard"
 const val IMPERIAL = "imperial"
@@ -69,14 +70,18 @@ class HomeFragment : Fragment() {
     private lateinit var rvHourly: RecyclerView
     private lateinit var rvDaily: RecyclerView
     private lateinit var homeDailyAdapter: HomeDailyAdapter
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var locationSharedPreferences: SharedPreferences
+    private lateinit var tempUnitSharedPreferences: SharedPreferences
     private var isLocationUpdated: Boolean = false
-    private var tempUnitFromPrefs : String? = ""
+    private var tempUnitFromPrefs: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedPreferences =
+        locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
+
+        tempUnitSharedPreferences =
+            requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         Log.d(TAG, "onCreate: ")
     }
 
@@ -109,6 +114,8 @@ class HomeFragment : Fragment() {
         cvDetails = view.findViewById(R.id.cv_details)
         cvDetails.visibility = View.GONE
 
+
+
         homeHourlyAdapter = HomeHourlyAdapter(requireContext())
         rvHourly.adapter = homeHourlyAdapter
         rvHourly.layoutManager =
@@ -140,6 +147,13 @@ class HomeFragment : Fragment() {
 //                }
 //            }
 
+
+
+
+
+
+
+
         lifecycleScope.launch {
             homeViewModel.currentWeather.collectLatest { result ->
 
@@ -150,7 +164,7 @@ class HomeFragment : Fragment() {
 
                     is ApiState.Success -> {
                         progressBar.visibility = View.GONE
-                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
+                        //Log.d(TAG, "Success Result: ${result.data.alerts} ")
                         setHomeData(result.data)
                         homeHourlyAdapter.submitList(result.data.hourly)
                         homeDailyAdapter.submitList(result.data.daily)
@@ -188,10 +202,26 @@ class HomeFragment : Fragment() {
 
         cvDetails.visibility = View.VISIBLE
         tvAddress.text = address
-        tvTempDegree.text = "$tempDegree °K"
+         when (tempUnitFromPrefs) {
+            KELVIN -> {
+                tvTempDegree.text = "$tempDegree °K"
+                tvWindSpeed.text = "${windSpeed}  meter/sec"
+            }
+            FAHRENHEIT -> {
+                tvTempDegree.text = "$tempDegree °F"
+                tvWindSpeed.text = "${windSpeed}  miles/hour"
+
+            }
+
+            else -> {
+                tvTempDegree.text = "$tempDegree °C"
+                tvWindSpeed.text = "${windSpeed}  meter/sec"
+
+            }
+
+        }
         tvMain.text = main
         tvHumidity.text = humidity.toString()
-        tvWindSpeed.text = windSpeed.toString()
         tvPressure.text = pressure.toString()
         tvClouds.text = clouds.toString()
 
@@ -218,26 +248,28 @@ class HomeFragment : Fragment() {
                     val longitude = location?.longitude.toString()
                     val latitude = location?.latitude.toString()
 
-                    sharedPreferences.edit().putString(LATITUDE, latitude).apply()
-                    sharedPreferences.edit().putString(LONGITUDE, longitude).apply()
-                    sharedPreferences.edit().putBoolean(LOCATION_UPDATED, true).apply()
+                    locationSharedPreferences.edit().putString(LATITUDE, latitude).apply()
+                    locationSharedPreferences.edit().putString(LONGITUDE, longitude).apply()
+                    locationSharedPreferences.edit().putBoolean(LOCATION_UPDATED, true).apply()
 
 
                     val latitudeFromPrefs =
-                        sharedPreferences.getString(LATITUDE, "No saved Latitude")
+                        locationSharedPreferences.getString(LATITUDE, "No saved Latitude")
                     val longitudeFromPrefs =
-                        sharedPreferences.getString(LONGITUDE, "No saved Longitude")
-
-                    tempUnitFromPrefs = sharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+                        locationSharedPreferences.getString(LONGITUDE, "No saved Longitude")
 
 
-                    Log.d(TAG, "Temp unit from prefs: $tempUnitFromPrefs ")
+
+                    tempUnitFromPrefs = tempUnitSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+
+
                     val tempUnit = when (tempUnitFromPrefs) {
                         KELVIN -> STANDARD
                         FAHRENHEIT -> IMPERIAL
-                        else -> CELSIUS
+                        else -> METRIC
 
                     }
+                    Log.d(TAG, "Temp unit from prefs changed: $tempUnit ")
 
 
 

@@ -35,4 +35,17 @@
     <string name="location">Location</string>
     <string name="confirm">Confirm</string>
     <string name="floating_dialog">Floating Dialog</string>
+    <string name="get_location_by_gps">Get Location by GPS</string>
+    <string name="choose_location_from_map">Choose Location from Map</string>
+    <string name="temperature_unit_preferences">Temperature Unit Preferences</string>
+    <string name="temperature_unit">Temperature Unit</string>
+    <string name="wind_speed_unit">Wind Speed Unit</string>
+    <string name="language_preferences">Language Preferences</string>
+    <string name="language">Language</string>
+    <string name="choose_your_preferred_language">Choose your preferred language</string>
+    <string name="choose_your_preferred_wind_speed_unit">Choose your preferred wind speed unit</string>
+    <string name="choose_your_preferred_temperature_unit">Choose your preferred temperature unit</string>
+    <string name="tap_to_choose_a_specific_location_from_the_map">Tap to choose a specific location from the map</string>
+    <string name="enable_to_get_location_automatically_using_gps">Enable to get location automatically using GPS</string>
+    <string name="location_preferences">Location Preferences</string>
 </resources>
