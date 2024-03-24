@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">طقس حكيم</string>
+    <string name="home">الصفحة الرئيسية</string>
+    <string name="alert">تنبيه</string>
+    <string name="favorite">المفضلة</string>
+    <string name="settings">الإعدادات</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">مرحباً بالقطعة الفارغة</string>
+    <string name="hello_home_fragment">مرحباً بقطعة الصفحة الرئيسية</string>
+    <string name="hello_settings_fragment">مرحباً بقطعة إعدادات الصفحة</string>
+    <string name="hello_settings_fragment1">مرحباً بقطعة إعدادات الصفحة</string>
+    <string name="hello_alert_fragment">مرحباً بقطعة تنبيه الصفحة</string>
+    <string name="hello_favorite_fragment">مرحباً بقطعة المفضلة</string>
+    <string name="weather_icon">أيقونة الطقس</string>
+    <string name="add_alert">إضافة تنبيه</string>
+    <!-- Preference Titles -->
+    <string name="messages_header">الرسائل</string>
+    <string name="sync_header">مزامنة</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">توقيعك</string>
+    <string name="reply_title">إجراء الرد الافتراضي</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">مزامنة البريد الإلكتروني بانتظام</string>
+    <string name="attachment_title">تنزيل المرفقات الواردة</string>
+    <string name="attachment_summary_on">تنزيل المرفقات تلقائيًا للرسائل الواردة</string>
+    <string name="attachment_summary_off">تنزيل المرفقات فقط عند الطلب اليدوي</string>
+    <string name="humidity">الرطوبة</string>
+    <string name="wind_speed">سرعة الرياح</string>
+    <string name="pressure">الضغط</string>
+    <string name="clouds">السحب</string>
+    <string name="gps">نظام تحديد المواقع العالمي</string>
+    <string name="location">الموقع</string>
+    <string name="confirm">تأكيد</string>
+    <string name="floating_dialog">مربع حوار عائم</string>
+    <string name="get_location_by_gps">الحصول على الموقع عبر نظام تحديد المواقع</string>
+    <string name="choose_location_from_map">اختيار الموقع من الخريطة</string>
+    <string name="temperature_unit_preferences">تفضيلات وحدة الحرارة</string>
+    <string name="temperature_unit">وحدة الحرارة</string>
+    <string name="wind_speed_unit">وحدة سرعة الرياح</string>
+    <string name="language_preferences">تفضيلات اللغة</string>
+    <string name="language">اللغة</string>
+    <string name="choose_your_preferred_language">اختر اللغة المفضلة لديك</string>
+    <string name="choose_your_preferred_wind_speed_unit">اختر وحدة سرعة الرياح المفضلة لديك</string>
+    <string name="choose_your_preferred_temperature_unit">اختر وحدة الحرارة المفضلة لديك</string>
+    <string name="tap_to_choose_a_specific_location_from_the_map">انقر لاختيار موقع محدد من الخريطة</string>
+    <string name="enable_to_get_location_automatically_using_gps">تمكين الحصول على الموقع تلقائيًا باستخدام نظام تحديد المواقع</string>
+    <string name="location_preferences">تفضيلات الموقع</string>
+</resources>

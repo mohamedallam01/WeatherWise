@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var fragment: FragmentContainerView
     lateinit var initialSetupDialog: InitialSetupDialog
-    lateinit var progressBar: ProgressBar
+   // lateinit var progressBar: ProgressBar
 
     private var isPermissionGranted = false
 
@@ -51,8 +51,8 @@ class MainActivity : AppCompatActivity() {
 
 
         fragment = findViewById(R.id.nav_host_fragment)
-        progressBar = findViewById(R.id.progress_Bar)
-        progressBar.visibility = View.GONE
+       // progressBar = findViewById(R.id.progress_Bar)
+        //progressBar.visibility = View.GONE
 
         Log.d(TAG, "onCreate: ")
         initMainActivity()
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             initialSetupDialog = InitialSetupDialog()
             initialSetupDialog.setPositiveButton(DialogInterface.OnClickListener { dialogInterface, _ ->
                 if (ChecksManager.isLocationIsEnabled(this)) {
-                    progressBar.visibility = View.VISIBLE
+                    //progressBar.visibility = View.VISIBLE
                     Log.d(TAG, "First initMainActivity: 11111111111 ")
 
                 } else {
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         else if (isPermissionGranted && isInitialSetupDone()){
-            progressBar.visibility = View.VISIBLE
+            //progressBar.visibility = View.VISIBLE
             Log.d(TAG, "Second initMainActivity: 222222222 ")
             initMainActivity()
         }
