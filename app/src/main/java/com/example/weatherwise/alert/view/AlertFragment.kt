@@ -35,6 +35,7 @@ import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.util.ChecksManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -162,10 +163,18 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     private fun pickDate() {
         fabAddAlert.setOnClickListener {
-            year = calender.get(Calendar.YEAR)
-            month = calender.get(Calendar.MONTH)
-            day = calender.get(Calendar.DAY_OF_MONTH)
-            DatePickerDialog(requireContext(), this, year, month, day).show()
+
+            if(ChecksManager.isDrawOverlayPermissionGranted(requireActivity())){
+                year = calender.get(Calendar.YEAR)
+                month = calender.get(Calendar.MONTH)
+                day = calender.get(Calendar.DAY_OF_MONTH)
+                DatePickerDialog(requireContext(), this, year, month, day).show()
+            }
+
+            else{
+                ChecksManager.requestDrawOverlayPermission(requireActivity())
+            }
+
         }
     }
 
