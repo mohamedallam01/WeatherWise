@@ -10,9 +10,11 @@ import com.example.weatherwise.model.WeatherRepo
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
@@ -21,6 +23,9 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
     private val _favoriteWeather: MutableLiveData<List<FavoriteWeather>> = MutableLiveData()
     val favoriteWeather: LiveData<List<FavoriteWeather>> = _favoriteWeather
+
+    private val _favoriteWeatherById: MutableLiveData<FavoriteWeather> = MutableLiveData()
+    val favoriteWeatherById: LiveData<FavoriteWeather> = _favoriteWeatherById
 
 
     private val _favWeatherDetails: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
@@ -44,7 +49,7 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
 
 
-    private fun getFavoriteWeatherDetailsFromRemote(
+     private fun getFavoriteWeatherDetailsFromRemote(
         lat: String,
         lon: String,
         language: String,
@@ -67,6 +72,16 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
         }
 
+
+    }
+
+    fun getFavoriteById(favoriteId : Int){
+        viewModelScope.launch {
+            _repo.getFavoriteById(favoriteId).collect{
+                _favoriteWeatherById.postValue(it)
+
+            }
+        }
 
     }
 

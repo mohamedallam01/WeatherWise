@@ -6,14 +6,59 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.cardview.widget.CardView
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
+import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
+import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
+import com.example.weatherwise.home.view.HomeDailyAdapter
+import com.example.weatherwise.home.view.HomeHourlyAdapter
+import com.example.weatherwise.model.WeatherRepoImpl
+import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.network.ApiState
+import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class DetailsFavoriteFragment : Fragment() {
 
     private val TAG = "DetailsFavoriteFragment"
-
+    private lateinit var favoriteViewModel: FavoriteViewModel
+    private lateinit var favoriteViewModelFactory: FavoriteViewModelFactory
+    private lateinit var progressBar: ProgressBar
+    private lateinit var tvAddress: TextView
+    private lateinit var tvTempDegree: TextView
+    private lateinit var tvMain: TextView
+    private lateinit var tvHumidity: TextView
+    private lateinit var tvWindSpeed: TextView
+    private lateinit var tvPressure: TextView
+    private lateinit var tvClouds: TextView
+    private lateinit var cvDetails: CardView
+    private lateinit var homeHourlyAdapter: HomeHourlyAdapter
+    private lateinit var rvHourly: RecyclerView
+    private lateinit var rvDaily: RecyclerView
+    private lateinit var homeDailyAdapter: HomeDailyAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        favoriteViewModelFactory = FavoriteViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(requireContext())
+
+            )
+        )
+
+        favoriteViewModel =
+            ViewModelProvider(this, favoriteViewModelFactory).get(FavoriteViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -30,11 +75,94 @@ class DetailsFavoriteFragment : Fragment() {
         val args = DetailsFavoriteFragmentArgs.fromBundle(
             requireArguments()
         )
-        val latitude = args.latitude
-        val longitude = args.longitude
 
-        Log.d(TAG, "latitude: $latitude, longitude: $longitude ")
+        val favoriteId = args.id
 
+        progressBar = view.findViewById(R.id.progress_Bar)
+        tvAddress = view.findViewById(R.id.tv_address)
+        tvTempDegree = view.findViewById(R.id.tv_temp_degree)
+        tvMain = view.findViewById(R.id.tv_main)
+        rvHourly = view.findViewById(R.id.rv_hourly)
+        rvDaily = view.findViewById(R.id.rv_daily)
+        tvHumidity = view.findViewById(R.id.tv_humidity_desc)
+        tvWindSpeed = view.findViewById(R.id.tv_wind_speed_desc)
+        tvPressure = view.findViewById(R.id.tv_pressure_desc)
+        tvClouds = view.findViewById(R.id.tv_clouds_desc)
+        cvDetails = view.findViewById(R.id.cv_details)
+        cvDetails.visibility = View.GONE
+
+        homeHourlyAdapter = HomeHourlyAdapter(requireContext())
+        rvHourly.adapter = homeHourlyAdapter
+        rvHourly.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+
+        homeDailyAdapter = HomeDailyAdapter(requireContext())
+        rvDaily.adapter = homeDailyAdapter
+        rvDaily.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+
+        favoriteViewModel.getFavoriteById(favoriteId)
+        var latitude = ""
+        var longitude = ""
+        favoriteViewModel.favoriteWeatherById.observe(viewLifecycleOwner){favoriteWeatherDetails ->
+             latitude = favoriteWeatherDetails.lat.toString()
+             longitude = favoriteWeatherDetails.lon.toString()
+            favoriteViewModel.setFavDetailsLocation(latitude,longitude,"en","metric")
+
+        }
+
+        lifecycleScope.launch {
+            favoriteViewModel.favWeatherDetails.collectLatest { result ->
+
+                when (result) {
+                    is ApiState.Loading -> {
+                        progressBar.visibility = View.VISIBLE
+                    }
+
+                    is ApiState.Success -> {
+                        progressBar.visibility = View.GONE
+                        Log.d(TAG, "Success Result: ${result.data} ")
+                        setHomeData(result.data)
+                        homeHourlyAdapter.submitList(result.data.hourly)
+                        homeDailyAdapter.submitList(result.data.daily)
+                    }
+
+                    is ApiState.Failure -> {
+                        progressBar.visibility = View.GONE
+                        Log.d(TAG, "Exception is: ${result.msg}")
+                        Toast.makeText(requireActivity(), result.msg.toString(), Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+
+                }
+            }
+
+
+        }
+
+
+
+    }
+
+
+    private fun setHomeData(weatherResponse: WeatherResponse) {
+        val address = weatherResponse.timezone
+        val tempDegree = weatherResponse.current.temp
+        val main = weatherResponse.current.weather[0].main
+        val humidity = weatherResponse.current.humidity
+        val windSpeed = weatherResponse.current.wind_speed
+        val pressure = weatherResponse.current.pressure
+        val clouds = weatherResponse.current.clouds
+
+        cvDetails.visibility = View.VISIBLE
+        tvAddress.text = address
+        tvTempDegree.text = "$tempDegree °C"
+        tvMain.text = main
+        tvHumidity.text = humidity.toString()
+        tvWindSpeed.text = windSpeed.toString()
+        tvPressure.text = pressure.toString()
+        tvClouds.text = clouds.toString()
 
 
     }

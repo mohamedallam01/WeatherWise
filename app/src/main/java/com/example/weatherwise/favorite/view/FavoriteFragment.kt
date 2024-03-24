@@ -4,14 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,19 +18,11 @@ import com.example.weatherwise.SharedLocationViewModel
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
-import com.example.weatherwise.home.view.HomeHourlyAdapter
-import com.example.weatherwise.home.view.LATITUDE
 import com.example.weatherwise.home.view.LOCATION
-import com.example.weatherwise.home.view.LONGITUDE
-import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+
 
 
 class FavoriteFragment : Fragment(), OnFavClickListener {
@@ -49,7 +39,6 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
     private lateinit var progressBarFavorite: ProgressBar
     private var isLocationUpdated: Boolean = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedLocationViewModel =
@@ -63,7 +52,6 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         return inflater.inflate(R.layout.fragment_favorite, container, false)
     }
 
@@ -79,7 +67,7 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
             findNavController().navigate(R.id.action_favoriteFragment_to_mapFragment2)
         }
 
-        favoriteAdapter = FavoriteAdapter(requireContext(), { moveToHome() })
+        favoriteAdapter = FavoriteAdapter(requireContext(), this)
         rvFavorites.adapter = favoriteAdapter
         rvFavorites.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -95,29 +83,21 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
         favoriteViewModel =
             ViewModelProvider(this, favoriteViewModelFactory).get(FavoriteViewModel::class.java)
 
-
         favoriteViewModel.getFavoriteWeatherFromDataBase()
         favoriteViewModel.favoriteWeather.observe(viewLifecycleOwner) {
             favoriteAdapter.submitList(it)
         }
-
-
     }
 
-    override fun moveToHome() {
+    override fun moveToDetails(favoriteId: Int) {
+        Log.d(TAG, "id: $favoriteId ")
 
-        val latitude = sharedLocationViewModel.latitude.value.toString()
-        val longitude = sharedLocationViewModel.longitude.value.toString()
-
-        favoriteViewModel.setFavDetailsLocation(latitude,longitude,"en","metric")
-
-        Log.d(TAG, "latitude: $latitude, longitude: $longitude ")
-
-        val action = FavoriteFragmentDirections.actionFavoriteFragmentToDetailsFavoriteFragment(latitude,longitude)
+        val action = FavoriteFragmentDirections.actionFavoriteFragmentToDetailsFavoriteFragment(favoriteId)
         findNavController().navigate(action)
-
     }
 }
+
+
 
 //if (!isLocationUpdated) {
 //    progressBarFavorite.visibility = View.VISIBLE

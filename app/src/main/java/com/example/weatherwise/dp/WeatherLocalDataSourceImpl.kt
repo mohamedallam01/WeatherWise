@@ -53,5 +53,9 @@ class WeatherLocalDataSourceImpl(context: Context) : WeatherLocalDataSource {
         return weatherDao.getAllFavorites()
     }
 
+    override fun getFavoriteById(favoriteId: Int): Flow<FavoriteWeather> {
+        return weatherDao.getFavoriteById(favoriteId)
+    }
+
 
 }

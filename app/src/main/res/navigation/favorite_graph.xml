@@ -31,12 +31,7 @@
         android:name="com.example.weatherwise.favorite.view.DetailsFavoriteFragment"
         android:label="DetailsFavoriteFragment" >
         <argument
-            android:name="latitude"
-            app:argType="string"
-            />
-        <argument
-            android:name="longitude"
-            app:argType="string"
-             />
+            android:name="id"
+            app:argType="integer" />
     </fragment>
 </navigation>

@@ -16,6 +16,8 @@ interface WeatherLocalDataSource {
    fun getAllAlerts() : Flow<List<Alert>>
    fun getAllFavorites() : Flow<List<FavoriteWeather>>
 
+   fun getFavoriteById(favoriteId : Int) : Flow<FavoriteWeather>
+
    suspend fun deleteAlert(alert: Alert)
 
 }
