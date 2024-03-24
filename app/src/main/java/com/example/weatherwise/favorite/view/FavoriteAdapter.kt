@@ -4,21 +4,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.weatherwise.R
-import com.example.weatherwise.model.DailyForecast
 import com.example.weatherwise.model.FavoriteWeather
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-class FavoriteAdapter (private val context: Context, private val moveToHome : () -> Unit) :
+class FavoriteAdapter(private val context: Context, private val listener: OnFavClickListener) :
     ListAdapter<FavoriteWeather, FavoriteViewHolder>(FavoriteDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteViewHolder {
@@ -32,7 +26,7 @@ class FavoriteAdapter (private val context: Context, private val moveToHome : ()
 
         holder.favoriteAddress.text = favoriteWeather.timezone
         holder.cvFavorite.setOnClickListener {
-            moveToHome()
+            listener.moveToDetails(favoriteWeather.fav_id)
         }
 
 

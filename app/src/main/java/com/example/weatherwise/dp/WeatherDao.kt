@@ -31,6 +31,9 @@ interface WeatherDao {
     @Query("SELECT * from favorite_table")
     fun getAllFavorites() : Flow<List<FavoriteWeather>>
 
+    @Query("SELECT * FROM favorite_table WHERE fav_id = :favoriteId")
+    fun getFavoriteById(favoriteId : Int): Flow<FavoriteWeather>
+
     @Query("SELECT * from alert_table")
      fun getAlerts(): Flow<List<Alert>>
 

@@ -28,6 +28,7 @@ import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
@@ -41,6 +42,12 @@ const val LOCATION = "location"
 const val LATITUDE = "latitude"
 const val LONGITUDE = "longitude"
 const val LOCATION_UPDATED = "is_location_updated"
+const val KELVIN = "Kelvin"
+const val CELSIUS = "Celsius"
+const val FAHRENHEIT = "Fahrenheit"
+const val METRIC = "metric"
+const val STANDARD = "standard"
+const val IMPERIAL = "imperial"
 
 class HomeFragment : Fragment() {
 
@@ -64,9 +71,12 @@ class HomeFragment : Fragment() {
     private lateinit var homeDailyAdapter: HomeDailyAdapter
     private lateinit var sharedPreferences: SharedPreferences
     private var isLocationUpdated: Boolean = false
+    private var tempUnitFromPrefs : String? = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        sharedPreferences =
+            requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
         Log.d(TAG, "onCreate: ")
     }
 
@@ -159,14 +169,9 @@ class HomeFragment : Fragment() {
 
 
         }
-        sharedPreferences =
-            requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
-        isLocationUpdated = sharedPreferences.getBoolean(LOCATION_UPDATED, false)
-        if (!isLocationUpdated) {
-            getFreshLocation()
-        } else {
-            getFavoriteLocation()
-        }
+
+
+        getFreshLocation()
 
 
     }
@@ -180,9 +185,10 @@ class HomeFragment : Fragment() {
         val pressure = weatherResponse.current.pressure
         val clouds = weatherResponse.current.clouds
 
+
         cvDetails.visibility = View.VISIBLE
         tvAddress.text = address
-        tvTempDegree.text = "$tempDegree °C"
+        tvTempDegree.text = "$tempDegree °K"
         tvMain.text = main
         tvHumidity.text = humidity.toString()
         tvWindSpeed.text = windSpeed.toString()
@@ -196,8 +202,6 @@ class HomeFragment : Fragment() {
     @SuppressLint("MissingPermission")
     fun getFreshLocation() {
 
-
-        Log.d(TAG, "getFreshLocation: ")
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationProviderClient.requestLocationUpdates(
@@ -211,8 +215,6 @@ class HomeFragment : Fragment() {
 
                     val location = locationResult.lastLocation
 
-                    Log.d(TAG, "onLocationResult: ")
-
                     val longitude = location?.longitude.toString()
                     val latitude = location?.latitude.toString()
 
@@ -220,9 +222,26 @@ class HomeFragment : Fragment() {
                     sharedPreferences.edit().putString(LONGITUDE, longitude).apply()
                     sharedPreferences.edit().putBoolean(LOCATION_UPDATED, true).apply()
 
-                    isLocationUpdated = true
-                    val latitudeFromPrefs = sharedPreferences.getString(LATITUDE, "")
-                    val longitudeFromPrefs = sharedPreferences.getString(LONGITUDE, "")
+
+                    val latitudeFromPrefs =
+                        sharedPreferences.getString(LATITUDE, "No saved Latitude")
+                    val longitudeFromPrefs =
+                        sharedPreferences.getString(LONGITUDE, "No saved Longitude")
+
+                    tempUnitFromPrefs = sharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+
+
+                    Log.d(TAG, "Temp unit from prefs: $tempUnitFromPrefs ")
+                    val tempUnit = when (tempUnitFromPrefs) {
+                        KELVIN -> STANDARD
+                        FAHRENHEIT -> IMPERIAL
+                        else -> CELSIUS
+
+                    }
+
+
+
+
 
                     Log.d(
                         TAG,
@@ -234,11 +253,11 @@ class HomeFragment : Fragment() {
                             latitudeFromPrefs,
                             longitudeFromPrefs,
                             "en",
-                            "metric"
+                            tempUnit
                         )
                     }
-                    val response = homeViewModel.currentWeather.value
-                    Log.d(TAG, "result: $response ")
+//                    val response = homeViewModel.currentWeather.value
+//                    Log.d(TAG, "result: $response ")
 
 
 //                    geocoder =
@@ -255,26 +274,26 @@ class HomeFragment : Fragment() {
         )
     }
 
-    private fun getFavoriteLocation() {
-
-        val latitudeFromPrefs = sharedPreferences.getString(LATITUDE, "")
-        val longitudeFromPrefs = sharedPreferences.getString(LONGITUDE, "")
-
-        Log.d(
-            TAG,
-            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
-        )
-
-        if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
-            homeViewModel.setCurrentLocation(
-                latitudeFromPrefs,
-                longitudeFromPrefs,
-                "en",
-                "metric"
-            )
-        }
-
-    }
+//    private fun getFavoriteLocation() {
+//
+//        val latitudeFromPrefs = sharedPreferences.getString(LATITUDE, "")
+//        val longitudeFromPrefs = sharedPreferences.getString(LONGITUDE, "")
+//
+////        Log.d(
+////            TAG,
+////            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
+////        )
+//
+//        if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
+//            homeViewModel.setCurrentLocation(
+//                latitudeFromPrefs,
+//                longitudeFromPrefs,
+//                "en",
+//                "metric"
+//            )
+//        }
+//
+//    }
 
 }
 

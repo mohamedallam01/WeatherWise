@@ -95,4 +95,8 @@ class WeatherRepoImpl private constructor(
     override suspend fun deleteAlert(alert: Alert) {
         weatherLocalDataSource.deleteAlert(alert)
     }
+
+    override fun getFavoriteById(favoriteId: Int): Flow<FavoriteWeather> {
+        return weatherLocalDataSource.getFavoriteById(favoriteId)
+    }
 }
