@@ -1,12 +1,15 @@
 package com.example.weatherwise.util
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -14,6 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.example.weatherwise.MainActivity
 
+
+private const val REQUEST_CODE_DRAW_OVER_OTHER_APPS = 123
 object ChecksManager {
 
     fun checkPermission(context: Context): Boolean {
@@ -65,5 +70,28 @@ object ChecksManager {
             result = true
         }
         return result
+    }
+
+
+
+
+    fun isDrawOverlayPermissionGranted(activity: Activity): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(activity)
+    }
+
+    fun requestDrawOverlayPermission(activity: Activity) {
+        if (!isDrawOverlayPermissionGranted(activity)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:${activity.packageName}")
+            )
+            activity.startActivityForResult(intent, REQUEST_CODE_DRAW_OVER_OTHER_APPS)
+        }
+    }
+
+    fun handleDrawOverlayPermissionResult(requestCode: Int, resultCode: Int,activity: Activity) : Boolean {
+        return requestCode == REQUEST_CODE_DRAW_OVER_OTHER_APPS &&
+                resultCode == Activity.RESULT_OK &&
+                isDrawOverlayPermissionGranted(activity)
     }
 }

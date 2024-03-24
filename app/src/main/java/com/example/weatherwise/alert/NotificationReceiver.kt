@@ -55,7 +55,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun showDialogActivity(context: Context){
-        val serviceIntent = Intent(context,DialogService::class.java).apply {
+        val serviceIntent = Intent(context, DialogService::class.java).apply {
             putExtra(ALERT_DESC,desc)
 
         }
