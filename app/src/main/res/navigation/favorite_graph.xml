@@ -14,8 +14,8 @@
             android:id="@+id/action_favoriteFragment_to_mapFragment2"
             app:destination="@id/mapFragment2" />
         <action
-            android:id="@+id/action_favoriteFragment_to_homeFragment2"
-            app:destination="@id/homeFragment2" />
+            android:id="@+id/action_favoriteFragment_to_detailsFavoriteFragment"
+            app:destination="@id/detailsFavoriteFragment" />
     </fragment>
     <fragment
         android:id="@+id/mapFragment2"
@@ -27,7 +27,16 @@
             app:destination="@id/favoriteFragment" />
     </fragment>
     <fragment
-        android:id="@+id/homeFragment2"
-        android:name="com.example.weatherwise.home.view.HomeFragment"
-        android:label="HomeFragment" />
+        android:id="@+id/detailsFavoriteFragment"
+        android:name="com.example.weatherwise.favorite.view.DetailsFavoriteFragment"
+        android:label="DetailsFavoriteFragment" >
+        <argument
+            android:name="latitude"
+            app:argType="string"
+            />
+        <argument
+            android:name="longitude"
+            app:argType="string"
+             />
+    </fragment>
 </navigation>

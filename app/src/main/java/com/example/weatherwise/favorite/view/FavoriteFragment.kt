@@ -105,20 +105,32 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
     }
 
     override fun moveToHome() {
-        if (!isLocationUpdated) {
-            progressBarFavorite.visibility = View.VISIBLE
-            sharedLocationViewModel.latitude.observe(viewLifecycleOwner) { latitude ->
-                sharedLocationViewModel.longitude.observe(viewLifecycleOwner) { longitude ->
-                    sharedPreferences.edit().putString(LATITUDE, latitude.toString()).apply()
-                    sharedPreferences.edit().putString(LONGITUDE, longitude.toString()).apply()
-                    Log.d(TAG, "latitude from shared view model: $latitude ")
-                    Log.d(TAG, "longitude from shared view model: $longitude ")
-                    isLocationUpdated = true
-                    findNavController().navigate(R.id.action_favoriteFragment_to_homeFragment2)
-                }
-            }
-        }
+
+        val latitude = sharedLocationViewModel.latitude.value.toString()
+        val longitude = sharedLocationViewModel.longitude.value.toString()
+
+        favoriteViewModel.setFavDetailsLocation(latitude,longitude,"en","metric")
+
+        Log.d(TAG, "latitude: $latitude, longitude: $longitude ")
+
+        val action = FavoriteFragmentDirections.actionFavoriteFragmentToDetailsFavoriteFragment(latitude,longitude)
+        findNavController().navigate(action)
+
     }
 }
+
+//if (!isLocationUpdated) {
+//    progressBarFavorite.visibility = View.VISIBLE
+//    sharedLocationViewModel.latitude.observe(viewLifecycleOwner) { latitude ->
+//        sharedLocationViewModel.longitude.observe(viewLifecycleOwner) { longitude ->
+//            sharedPreferences.edit().putString(LATITUDE, latitude.toString()).apply()
+//            sharedPreferences.edit().putString(LONGITUDE, longitude.toString()).apply()
+//            Log.d(TAG, "latitude from shared view model: $latitude ")
+//            Log.d(TAG, "longitude from shared view model: $longitude ")
+//            isLocationUpdated = true
+//            //findNavController().navigate(R.id.action_favoriteFragment_to_homeFragment2)
+//        }
+//    }
+//}
 
 
