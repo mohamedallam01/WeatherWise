@@ -250,7 +250,6 @@ class HomeFragment : Fragment() {
 
                     locationSharedPreferences.edit().putString(LATITUDE, latitude).apply()
                     locationSharedPreferences.edit().putString(LONGITUDE, longitude).apply()
-                    locationSharedPreferences.edit().putBoolean(LOCATION_UPDATED, true).apply()
 
 
                     val latitudeFromPrefs =
@@ -282,6 +281,8 @@ class HomeFragment : Fragment() {
                         "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
                     )
 
+
+
                     if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
                         homeViewModel.setCurrentLocation(
                             latitudeFromPrefs,
@@ -304,6 +305,8 @@ class HomeFragment : Fragment() {
                 }
             },
             Looper.myLooper()
+
+
 
         )
     }

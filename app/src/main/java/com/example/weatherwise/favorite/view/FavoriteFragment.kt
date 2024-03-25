@@ -1,6 +1,5 @@
 package com.example.weatherwise.favorite.view
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -18,12 +17,12 @@ import com.example.weatherwise.SharedLocationViewModel
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
-import com.example.weatherwise.home.view.LOCATION
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
+const val FAVORITE_FRAGMENT = "favorite_fragment"
 
 class FavoriteFragment : Fragment(), OnFavClickListener {
 
@@ -43,8 +42,6 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
         super.onCreate(savedInstanceState)
         sharedLocationViewModel =
             ViewModelProvider(requireActivity()).get(SharedLocationViewModel::class.java)
-        sharedPreferences =
-            requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
     }
 
@@ -64,7 +61,8 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
         progressBarFavorite.visibility = View.GONE
 
         fabAddFav.setOnClickListener {
-            findNavController().navigate(R.id.action_favoriteFragment_to_mapFragment2)
+            val action = FavoriteFragmentDirections.actionFavoriteFragmentToMapFragment2(FAVORITE_FRAGMENT)
+            findNavController().navigate(action)
         }
 
         favoriteAdapter = FavoriteAdapter(requireContext(), this)
