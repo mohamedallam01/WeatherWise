@@ -1,6 +1,7 @@
 package com.example.weatherwise.preferences
 
-
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.app.LocaleManager
 import android.content.Context
 import android.content.res.Configuration
@@ -9,8 +10,12 @@ import android.os.Bundle
 import android.os.LocaleList
 import android.util.Log
 import android.view.Display.Mode
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -82,17 +87,48 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     }
 
-    private fun updateLocale(language : String){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context?.getSystemService(LocaleManager::class.java)
-                ?.applicationLocales = LocaleList.forLanguageTags(language)
-        } else {
-            AppCompatDelegate.setApplicationLocales(
-                LocaleListCompat.forLanguageTags(
-                    "en"
-                )
-            )
+    private fun updateLocale(language: String) {
+        val activity = activity
+        if (activity != null && isAdded) {
+            val rootView = (activity as? AppCompatActivity)?.findViewById<ViewGroup>(android.R.id.content)?.getChildAt(0)
+
+            rootView?.fadeOutAndIn {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context?.getSystemService(LocaleManager::class.java)
+                        ?.applicationLocales = LocaleList.forLanguageTags(language)
+                } else {
+                    AppCompatDelegate.setApplicationLocales(
+                        LocaleListCompat.forLanguageTags(language)
+                    )
+                }
+                rootView?.postDelayed({
+                    activity.recreate()
+                }, 600)
+            }
         }
+    }
+
+
+
+    private fun View.fadeOutAndIn(onAnimationEnd: () -> Unit) {
+        animate().alpha(0f).setDuration(300).setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                onAnimationEnd()
+                animate().alpha(1f).setDuration(300).setListener(null)
+            }
+        })
+
+
+    }
+
+    private fun Fragment.applyFadeAnimation() {
+        val rootView = requireActivity().findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+        rootView.fadeOutAndIn { requireActivity().recreate() }
+    }
+
+    private fun AppCompatActivity.applyFadeAnimation() {
+        val rootView = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+        rootView.fadeOutAndIn { recreate() }
     }
 
 

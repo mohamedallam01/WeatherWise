@@ -13,14 +13,12 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
-import com.example.weatherwise.SharedLocationViewModel
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
@@ -28,6 +26,7 @@ import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.preferences.LANG_KEY
 import com.example.weatherwise.preferences.PREFS
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -71,16 +70,17 @@ class HomeFragment : Fragment() {
     private lateinit var rvDaily: RecyclerView
     private lateinit var homeDailyAdapter: HomeDailyAdapter
     private lateinit var locationSharedPreferences: SharedPreferences
-    private lateinit var tempUnitSharedPreferences: SharedPreferences
+    private lateinit var prefsSharedPreferences: SharedPreferences
     private var isLocationUpdated: Boolean = false
     private var tempUnitFromPrefs: String? = ""
+    private var languageFromPrefs: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
-        tempUnitSharedPreferences =
+        prefsSharedPreferences =
             requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         Log.d(TAG, "onCreate: ")
     }
@@ -260,7 +260,9 @@ class HomeFragment : Fragment() {
 
 
 
-                    tempUnitFromPrefs = tempUnitSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+                    tempUnitFromPrefs = prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+                    languageFromPrefs =
+                        prefsSharedPreferences.getString(LANG_KEY,"No Saved Language").toString()
 
 
                     val tempUnit = when (tempUnitFromPrefs) {
@@ -284,7 +286,7 @@ class HomeFragment : Fragment() {
                         homeViewModel.setCurrentLocation(
                             latitudeFromPrefs,
                             longitudeFromPrefs,
-                            "en",
+                            languageFromPrefs,
                             tempUnit
                         )
                     }
