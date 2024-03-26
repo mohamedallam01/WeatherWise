@@ -22,13 +22,18 @@ import com.example.weatherwise.R
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
+import com.example.weatherwise.map.view.MAP_FRAGMENT
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.preferences.LANG_KEY
+import com.example.weatherwise.preferences.LOCATION_GPS_KEY
 import com.example.weatherwise.preferences.PREFS
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
+import com.example.weatherwise.util.GPS
+import com.example.weatherwise.util.INITIAL_CHOICE
+import com.example.weatherwise.util.INITIAL_PREFS
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
@@ -38,10 +43,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
-const val LOCATION = "location"
+const val LOCATION = "Location"
 const val LATITUDE = "latitude"
 const val LONGITUDE = "longitude"
-const val LOCATION_UPDATED = "is_location_updated"
 const val KELVIN = "kelvin"
 const val CELSIUS = "celsius"
 const val FAHRENHEIT = "fahrenheit"
@@ -71,17 +75,16 @@ class HomeFragment : Fragment() {
     private lateinit var homeDailyAdapter: HomeDailyAdapter
     private lateinit var locationSharedPreferences: SharedPreferences
     private lateinit var prefsSharedPreferences: SharedPreferences
-    private var isLocationUpdated: Boolean = false
+    private lateinit var initialSharedPreferences: SharedPreferences
     private var tempUnitFromPrefs: String? = ""
     private var languageFromPrefs: String = ""
+    private var mapFragmentKey = ""
+    private var locationInitialPrefs = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        locationSharedPreferences =
-            requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
-        prefsSharedPreferences =
-            requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
         Log.d(TAG, "onCreate: ")
     }
 
@@ -136,6 +139,9 @@ class HomeFragment : Fragment() {
 
         homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
 
+//        val homeArgs = HomeFragmentArgs.fromBundle(requireArguments())
+//        mapFragmentKey = homeArgs.mapFragemnt
+
 //        lifecycleScope.launch {
 //            homeViewModel.currentWeather.observe(viewLifecycleOwner) { weatherResponse ->
 //                weatherResponse?.let {
@@ -148,10 +154,36 @@ class HomeFragment : Fragment() {
 //            }
 
 
+        locationSharedPreferences =
+            requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
+        prefsSharedPreferences =
+            requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+        initialSharedPreferences =
+            requireContext().getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
 
+        locationInitialPrefs =
+            initialSharedPreferences.getString(INITIAL_CHOICE, "No Location").toString()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        Log.d(TAG, "onResume: ")
+
+        if (initialSharedPreferences.getString(INITIAL_CHOICE, "No GPS") == GPS) {
+
+            getFreshLocation()
+
+        } else if (locationInitialPrefs == LOCATION) {
+            getLocationFromMap()
+        }
+
+        Log.d(
+            TAG, "initial choice: $locationInitialPrefs"
+        )
 
 
         lifecycleScope.launch {
@@ -184,10 +216,18 @@ class HomeFragment : Fragment() {
 
         }
 
+    }
 
-        getFreshLocation()
+    override fun onStart() {
+        super.onStart()
 
+        Log.d(TAG, "onStart: ")
+    }
 
+    override fun onPause() {
+        super.onPause()
+
+        Log.d(TAG, "onPause: ")
     }
 
     private fun setHomeData(weatherResponse: WeatherResponse) {
@@ -202,11 +242,12 @@ class HomeFragment : Fragment() {
 
         cvDetails.visibility = View.VISIBLE
         tvAddress.text = address
-         when (tempUnitFromPrefs) {
+        when (tempUnitFromPrefs) {
             KELVIN -> {
                 tvTempDegree.text = "$tempDegree °K"
                 tvWindSpeed.text = "${windSpeed}  meter/sec"
             }
+
             FAHRENHEIT -> {
                 tvTempDegree.text = "$tempDegree °F"
                 tvWindSpeed.text = "${windSpeed}  miles/hour"
@@ -250,7 +291,6 @@ class HomeFragment : Fragment() {
 
                     locationSharedPreferences.edit().putString(LATITUDE, latitude).apply()
                     locationSharedPreferences.edit().putString(LONGITUDE, longitude).apply()
-                    locationSharedPreferences.edit().putBoolean(LOCATION_UPDATED, true).apply()
 
 
                     val latitudeFromPrefs =
@@ -260,9 +300,10 @@ class HomeFragment : Fragment() {
 
 
 
-                    tempUnitFromPrefs = prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+                    tempUnitFromPrefs =
+                        prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
                     languageFromPrefs =
-                        prefsSharedPreferences.getString(LANG_KEY,"No Saved Language").toString()
+                        prefsSharedPreferences.getString(LANG_KEY, "No Saved Language").toString()
 
 
                     val tempUnit = when (tempUnitFromPrefs) {
@@ -281,6 +322,8 @@ class HomeFragment : Fragment() {
                         TAG,
                         "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
                     )
+
+
 
                     if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
                         homeViewModel.setCurrentLocation(
@@ -305,8 +348,54 @@ class HomeFragment : Fragment() {
             },
             Looper.myLooper()
 
+
         )
     }
+
+    @SuppressLint("MissingPermission")
+    fun getLocationFromMap() {
+
+
+        val latitudeFromPrefs =
+            locationSharedPreferences.getString(LATITUDE, "No saved Latitude")
+        val longitudeFromPrefs =
+            locationSharedPreferences.getString(LONGITUDE, "No saved Longitude")
+
+
+
+        tempUnitFromPrefs =
+            prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+        languageFromPrefs =
+            prefsSharedPreferences.getString(LANG_KEY, "No Saved Language").toString()
+
+
+        val tempUnit = when (tempUnitFromPrefs) {
+            KELVIN -> STANDARD
+            FAHRENHEIT -> IMPERIAL
+            else -> METRIC
+
+        }
+        Log.d(TAG, "Temp unit from prefs changed: $tempUnit ")
+
+        Log.d(
+            TAG,
+            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
+        )
+
+        if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
+            homeViewModel.setCurrentLocation(
+                latitudeFromPrefs,
+                longitudeFromPrefs,
+                languageFromPrefs,
+                tempUnit
+            )
+        }
+
+
+    }
+
+
+}
 
 //    private fun getFavoriteLocation() {
 //
@@ -329,5 +418,5 @@ class HomeFragment : Fragment() {
 //
 //    }
 
-}
+
 

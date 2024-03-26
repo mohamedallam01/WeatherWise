@@ -3,6 +3,7 @@ package com.example.weatherwise
 
 import android.content.Context
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.widget.ProgressBar
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -38,7 +40,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var fragment: FragmentContainerView
     lateinit var initialSetupDialog: InitialSetupDialog
-   // lateinit var progressBar: ProgressBar
+    // lateinit var progressBar: ProgressBar
+
+    private lateinit var initialSharedPreferences: SharedPreferences
+
 
     private var isPermissionGranted = false
 
@@ -49,13 +54,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        initialSharedPreferences = getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
         fragment = findViewById(R.id.nav_host_fragment)
-       // progressBar = findViewById(R.id.progress_Bar)
-        //progressBar.visibility = View.GONE
 
         Log.d(TAG, "onCreate: ")
+
+
         initMainActivity()
+
 
     }
 
@@ -68,7 +74,6 @@ class MainActivity : AppCompatActivity() {
             initialSetupDialog = InitialSetupDialog()
             initialSetupDialog.setPositiveButton(DialogInterface.OnClickListener { dialogInterface, _ ->
                 if (ChecksManager.isLocationIsEnabled(this)) {
-                    //progressBar.visibility = View.VISIBLE
                     Log.d(TAG, "First initMainActivity: 11111111111 ")
 
                 } else {
@@ -89,11 +94,11 @@ class MainActivity : AppCompatActivity() {
                     ), REQUEST_CODE
                 )
             }
-        }
-        else if (isPermissionGranted && isInitialSetupDone()){
+        } else if (isPermissionGranted && isInitialSetupDone()) {
             //progressBar.visibility = View.VISIBLE
             Log.d(TAG, "Second initMainActivity: 222222222 ")
             initMainActivity()
+
         }
     }
 
@@ -133,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
-        
+
     }
 
     private fun initMainActivity() {
@@ -169,12 +174,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isInitialSetupDone(): Boolean {
-        val sharedPreferences = getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
-        return sharedPreferences.contains(INITIAL_CHOICE)
+        return initialSharedPreferences.contains(INITIAL_CHOICE)
     }
-
-
-
 
 
 }

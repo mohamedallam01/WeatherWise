@@ -41,7 +41,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("location_gps")?.setOnPreferenceChangeListener { preference, newValue ->
             sharedPreferences.edit().putString(LOCATION_GPS_KEY, newValue.toString()).apply()
-
+            Log.d(TAG, "New Value GPS: $newValue ")
             true
         }
 
@@ -55,7 +55,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         }
 
         val savedTempUnit = sharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
-        Log.d(TAG, "Saved Temp Unit: $savedTempUnit ")
+        //Log.d(TAG, "Saved Temp Unit: $savedTempUnit ")
 
 
         findPreference<Preference>("wind_unit")?.setOnPreferenceChangeListener { preference, newValue ->
@@ -64,8 +64,8 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val savedWindUnit = sharedPreferences.getString(WIND_UNIT_KEY, "No saved Wind GPS")
-        Log.d(TAG, "Saved Wind Unit: $savedWindUnit ")
+        val savedWindUnit = sharedPreferences.getString(WIND_UNIT_KEY, "No saved Wind ")
+        //Log.d(TAG, "Saved Wind Unit: $savedWindUnit ")
 
 
         findPreference<Preference>("language")?.setOnPreferenceChangeListener { preference, newValue ->
@@ -74,7 +74,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             true
         }
         val savedLang = sharedPreferences.getString(LANG_KEY, "No saved Language")
-        Log.d(TAG, "Saved Lang: $savedLang ")
+        //Log.d(TAG, "Saved Lang: $savedLang ")
 
 
         val locationMapPreference: Preference? = findPreference("location_map")
@@ -101,7 +101,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                         LocaleListCompat.forLanguageTags(language)
                     )
                 }
-                rootView?.postDelayed({
+                rootView.postDelayed({
                     activity.recreate()
                 }, 600)
             }
@@ -130,6 +130,9 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         val rootView = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
         rootView.fadeOutAndIn { recreate() }
     }
+
+
+
 
 
 
