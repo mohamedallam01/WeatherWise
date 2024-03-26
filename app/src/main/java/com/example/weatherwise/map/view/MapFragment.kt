@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.weatherwise.R
@@ -18,8 +18,6 @@ import com.example.weatherwise.favorite.view.FAVORITE_FRAGMENT
 import com.example.weatherwise.home.view.LATITUDE
 import com.example.weatherwise.home.view.LOCATION
 import com.example.weatherwise.home.view.LONGITUDE
-import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.map.viewmodel.MapViewModel
 import com.example.weatherwise.map.viewmodel.MapViewModelFactory
 import com.example.weatherwise.model.FavoriteWeather
@@ -36,8 +34,8 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
-
 const val ORIGIN_FRAGMENT = "origin_fragment"
+const val MAP_FRAGMENT = "map_fragment"
 class MapFragment : Fragment(), MapEventsReceiver{
 
     private lateinit var mapView : MapView
@@ -54,7 +52,7 @@ class MapFragment : Fragment(), MapEventsReceiver{
 
         Configuration.getInstance().load(context,androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext()))
         sharedLocationViewModel = ViewModelProvider(requireActivity()).get(SharedLocationViewModel::class.java)
-
+        mapPrefs = requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
     }
 
@@ -72,7 +70,6 @@ class MapFragment : Fragment(), MapEventsReceiver{
 
         mapView = view.findViewById(R.id.map_view)
         btnConfirm = view.findViewById(R.id.btn_confirm)
-        mapPrefs = requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
 
         mapViewModelFactory = MapViewModelFactory(
@@ -126,18 +123,16 @@ class MapFragment : Fragment(), MapEventsReceiver{
 
             val fav = FavoriteWeather(lat =latitude, lon = longitude, timezone = "Cairo")
 
-            originFragment = arguments?.getString(ORIGIN_FRAGMENT)
+            val mapArgs = MapFragmentArgs.fromBundle(requireArguments())
+            originFragment = mapArgs.originFragment
             Log.d(TAG, "origin fragment: $originFragment ")
-
-            if (originFragment == HOME_FRAGMENT){
-                mapPrefs.edit().putString(LATITUDE, latitude.toString()).apply()
-                mapPrefs.edit().putString(LONGITUDE, longitude.toString()).apply()
-
-            }
 
             btnConfirm.setOnClickListener {
                 if (originFragment == HOME_FRAGMENT){
-                    findNavController().navigate(R.id.action_mapFragment3_to_homeFragment)
+                    mapPrefs.edit().putString(LATITUDE, latitude.toString()).apply()
+                    mapPrefs.edit().putString(LONGITUDE, longitude.toString()).apply()
+                    val action = MapFragmentDirections.actionMapFragment3ToHomeFragment(MAP_FRAGMENT)
+                    findNavController().navigate(action)
 
                 }
                 else if(originFragment == FAVORITE_FRAGMENT){

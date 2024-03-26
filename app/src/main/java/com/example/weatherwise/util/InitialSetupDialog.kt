@@ -22,6 +22,8 @@ import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 const val INITIAL_PREFS = "InitialPreferences"
 const val INITIAL_CHOICE = "initialChoice"
 const val HOME_FRAGMENT = "home_fragment"
+const val GPS = "GPS"
+const val LOCATION = "Location"
 
 class InitialSetupDialog : DialogFragment() {
 
@@ -48,17 +50,17 @@ class InitialSetupDialog : DialogFragment() {
             .setTitle("Initial Setup")
             .setPositiveButton("OK") { dialog, which ->
                 positiveButtonListener?.onClick(dialog, which)
-                val selected = initialPrefs.getString(INITIAL_CHOICE, "GPS") ?: "GPS"
-                if (selected == "Location") {
+                val selected = initialPrefs.getString(INITIAL_CHOICE, GPS) ?: GPS
+                if (selected == LOCATION) {
                     val action = HomeFragmentDirections.actionHomeFragmentToMapFragment3(HOME_FRAGMENT)
                     findNavController().navigate(action)
                 }
                 Log.d(TAG, "selected: $selected ")
             }
             .setSingleChoiceItems(
-                arrayOf("GPS", "Location"), 0
+                arrayOf(GPS, "Location"), 0
             ) { dialog, which ->
-                val selected = if (which == 0) "GPS" else "Location"
+                val selected = if (which == 0) GPS else LOCATION
                 initialPrefs.edit().putString(INITIAL_CHOICE, selected).commit()
                 if (which == 0) {
                     prefs.edit().putString(LOCATION_GPS_KEY, true.toString()).apply()
