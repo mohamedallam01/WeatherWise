@@ -39,4 +39,7 @@ interface WeatherDao {
 
    @Delete
    suspend fun deleteAlert(alert: Alert)
+
+    @Delete
+    suspend fun deleteFavorite(favoriteWeather: FavoriteWeather)
 }

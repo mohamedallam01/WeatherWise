@@ -1,8 +1,8 @@
 package com.example.weatherwise.model
 
 data class WeatherDetails(
-    val id: Int,
-    val main: String,
-    val description: String,
-    val icon: String
+    var id: Int = 0,
+    var main: String = "",
+    var description: String = "",
+    var icon: String = ""
 )

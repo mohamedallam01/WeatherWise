@@ -196,12 +196,12 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                         val goodWeather = "Good Weather, Enjoy"
 
                         val desc =
-                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts[0].description == null) {
+                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts!![0].description == null) {
 
                                 goodWeather
                             } else {
 
-                                result.data.alerts[0].description
+                                result.data.alerts!![0].description
                             }
 
                         val currentAlert = result.data.alerts?.get(0)

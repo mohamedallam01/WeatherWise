@@ -1,18 +1,18 @@
 package com.example.weatherwise.model
 
 data class HourlyForecast(
-    val dt: Long,
-    val temp: Double,
-    val feels_like: Double,
-    val pressure: Int,
-    val humidity: Int,
-    val dew_point: Double,
-    val uvi: Double,
-    val clouds: Int,
-    val visibility: Int,
-    val wind_speed: Double,
-    val wind_deg: Int,
-    val wind_gust: Double,
-    val weather: List<WeatherDetails>,
-    val pop: Double
+    var dt: Long = 0,
+    var temp: Double = 0.0,
+    var feels_like: Double = 0.0,
+    var pressure: Int = 0,
+    var humidity: Int = 0,
+    var dew_point: Double = 0.0,
+    var uvi: Double = 0.0,
+    var clouds: Int = 0,
+    var visibility: Int = 0,
+    var wind_speed: Double = 0.0,
+    var wind_deg: Int = 0,
+    var wind_gust: Double = 0.0,
+    var weather: List<WeatherDetails> = listOf(),
+    var pop: Double = 0.0
 )

@@ -8,9 +8,9 @@ import androidx.room.PrimaryKey
 data class FavoriteWeather(
     @PrimaryKey(autoGenerate = true)
     val fav_id : Int = 0,
-    val lat: Double,
-    val lon: Double,
-    val timezone: String,
+    val lat: Double = 0.0,
+    val lon: Double = 0.0,
+    val timezone: String = "",
     //val timezone_offset: Int,
     //val current: CurrentWeather,
     //val minutely: List<MinutelyForecast>,
