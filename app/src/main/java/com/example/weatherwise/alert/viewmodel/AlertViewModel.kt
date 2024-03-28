@@ -25,19 +25,19 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
     private val _alertWeather: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
     val alertWeather = _alertWeather.asStateFlow()
 
-    private val _currentAlert: MutableStateFlow<List<Alert>> = MutableStateFlow(emptyList<Alert>())
-    val currentAlert: StateFlow<List<Alert>> = _currentAlert.asStateFlow()
+    private val _allAlerta: MutableStateFlow<List<Alert>> = MutableStateFlow(emptyList<Alert>())
+    val allAlerts: StateFlow<List<Alert>> = _allAlerta.asStateFlow()
 
-    fun setAlertLocation(lat: String, lon: String, language: String, units: String) {
+    fun setAlertLocation(lat: String, lon: String, language: String = "", units: String = "") {
         getAlertWeather(lat, lon, language, units)
     }
 
 
-    private fun getAlertWeather(
-        lat: String,
-        lon: String,
-        language: String,
-        units: String
+     fun getAlertWeather(
+        lat: String ,
+        lon: String  ,
+        language: String = "" ,
+        units: String = ""
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -70,7 +70,7 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
     fun getAllAlerts() {
         viewModelScope.launch {
             _repo.getAllAlerts().collectLatest{
-                _currentAlert.value = it
+                _allAlerta.value = it
             }
         }
     }

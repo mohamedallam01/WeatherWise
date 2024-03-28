@@ -3,14 +3,16 @@ package com.example.weatherwise.model
 import android.util.Log
 import com.example.weatherwise.dp.WeatherLocalDataSource
 import com.example.weatherwise.network.WeatherRemoteDataSource
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
-class WeatherRepoImpl private constructor(
+class WeatherRepoImpl  constructor(
     private val weatherRemoteDataSource: WeatherRemoteDataSource,
-    private val weatherLocalDataSource: WeatherLocalDataSource
+    private val weatherLocalDataSource: WeatherLocalDataSource,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : WeatherRepo {
 
     private val TAG = "WeatherRepoImpl"
@@ -38,7 +40,7 @@ class WeatherRepoImpl private constructor(
     }
 
     override fun getWeatherResponse(): Flow<WeatherResponse> {
-        Log.d(TAG, "getWeatherResponse: ${weatherLocalDataSource.getWeatherResponse()}")
+       // Log.d(TAG, "getWeatherResponse: ${weatherLocalDataSource.getWeatherResponse()}")
         return weatherLocalDataSource.getWeatherResponse()
     }
 
@@ -61,15 +63,15 @@ class WeatherRepoImpl private constructor(
 
             try {
                 //weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
-                Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
+                //Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
             } catch (exception: Exception) {
 
-                Log.d(TAG, "Exception: $exception ")
+                //Log.d(TAG, "Exception: $exception ")
 
             }
 
         } else {
-            Log.d(TAG, "getCurrentWeatherFromRemote: Null")
+            //Log.d(TAG, "getCurrentWeatherFromRemote: Null")
         }
         emit(weatherResponseFromRemote)
 

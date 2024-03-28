@@ -9,16 +9,16 @@ import androidx.room.PrimaryKey
 data class WeatherResponse(
 
     @PrimaryKey(autoGenerate = true)
-    val id : Int,
-    val lat: Double,
-    val lon: Double,
-    val timezone: String,
-    val timezone_offset: Int,
-    val current: CurrentWeather,
+    var id : Int = 0,
+    var lat: Double = 0.0,
+    var lon: Double = 0.0,
+    var timezone: String = "",
+    var timezone_offset: Int = 0,
+    var current: CurrentWeather = CurrentWeather(),
     //val minutely: List<MinutelyForecast>,
-    val daily: List<DailyForecast>,
-    val hourly: List<HourlyForecast>,
-    val alerts : List<Alert>?
+    var daily: List<DailyForecast> = listOf(),
+    var hourly: List<HourlyForecast> =  listOf(),
+    var alerts : List<Alert>? = null
 )
 
 

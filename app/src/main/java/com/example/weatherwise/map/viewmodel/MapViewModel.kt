@@ -22,8 +22,8 @@ class MapViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
     private val TAG = "MapViewModel"
 
-    private val _favoriteWeather: MutableLiveData<WeatherResponse> = MutableLiveData()
-     val favoriteWeather: LiveData<WeatherResponse> = _favoriteWeather
+    private val _favoriteWeather: MutableStateFlow<WeatherResponse> = MutableStateFlow(WeatherResponse())
+     val favoriteWeather = _favoriteWeather.asStateFlow()
 //    fun setAlertLocation(lat: String, lon: String, language: String, units: String) {
 //
 //        getFavoriteWeatherFromDataBase(lat,lon,language,units)

@@ -2,42 +2,42 @@ package com.example.weatherwise.model
 
 
 data class DailyForecast(
-    val dt: Long,
-    val sunrise: Long,
-    val sunset: Long,
-    val moonrise: Long,
-    val moonset: Long,
-    val moon_phase: Double,
-    val summary: String,
-    val temp: Temperature,
-    val feels_like: FeelsLike,
-    val pressure: Int,
-    val humidity: Int,
-    val dew_point: Double,
-    val wind_speed: Double,
-    val wind_deg: Int,
-    val wind_gust: Double,
-    val weather: List<WeatherDetails>,
-    val clouds: Int,
-    val pop: Double,
-    val rain: Double?,
-    val uvi: Double
+    var dt: Long = 0,
+    var sunrise: Long = 0,
+    var sunset: Long = 0,
+    var moonrise: Long = 0,
+    var moonset: Long = 0,
+    var moon_phase: Double = 0.0,
+    var summary: String = "",
+    var temp: Temperature = Temperature(),
+    var feels_like: FeelsLike,
+    var pressure: Int = 0,
+    var humidity: Int = 0,
+    var dew_point: Double = 0.0,
+    var wind_speed: Double = 0.0,
+    var wind_deg: Int = 0,
+    var wind_gust: Double = 0.0,
+    var weather: List<WeatherDetails> = listOf(),
+    var clouds: Int = 0,
+    var pop: Double = 0.0,
+    var rain: Double? = 0.0,
+    var uvi: Double = 0.0
 )
 
 data class Temperature(
-    val day: Double,
-    val min: Double,
-    val max: Double,
-    val night: Double,
-    val eve: Double,
-    val morn: Double
+    var day: Double = 0.0,
+    var min: Double = 0.0,
+    var max: Double = 0.0,
+    var night: Double = 0.0,
+    var eve: Double = 0.0,
+    var morn: Double = 0.0
 )
 
 data class FeelsLike(
-    val day: Double,
-    val night: Double,
-    val eve: Double,
-    val morn: Double
+    var day: Double = 0.0,
+    var night: Double = 0.0,
+    var eve: Double = 0.0,
+    var morn: Double =0.0
 )
 
 

@@ -7,10 +7,10 @@ interface WeatherRepo {
             fun getWeatherResponse() : Flow<WeatherResponse>
            // suspend fun insertWeatherResponse(weatherResponse: WeatherResponse)
 
-     fun getCurrentWeatherFromRemote(lat: String,
-                                  lon: String,
-                                  language: String,
-                                  units: String):Flow<WeatherResponse>
+     fun getCurrentWeatherFromRemote(lat: String = "",
+                                  lon: String = "",
+                                  language: String = "",
+                                  units: String = ""):Flow<WeatherResponse>
 
 
      fun getAllAlerts() :Flow<List<Alert>>

@@ -38,6 +38,7 @@ import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,8 +76,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     val calender = Calendar.getInstance()
 
-    private lateinit var rvAlerts : RecyclerView
-    private lateinit var alertAdapter : AlertAdapter
+    private lateinit var rvAlerts: RecyclerView
+    private lateinit var alertAdapter: AlertAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +118,15 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
         alertViewModel =
             ViewModelProvider(this, alertViewModelFactory).get(AlertViewModel::class.java)
+
+        Log.d(TAG, "current Alert: ${alertViewModel.getAllAlerts()} ")
+        lifecycleScope.launch {
+            alertViewModel.allAlerts.collect {
+                alertAdapter.submitList(it)
+            }
+
+        }
+
 
         pickDate()
 
@@ -164,14 +174,12 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     private fun pickDate() {
         fabAddAlert.setOnClickListener {
 
-            if(ChecksManager.isDrawOverlayPermissionGranted(requireActivity())){
+            if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
                 year = calender.get(Calendar.YEAR)
                 month = calender.get(Calendar.MONTH)
                 day = calender.get(Calendar.DAY_OF_MONTH)
                 DatePickerDialog(requireContext(), this, year, month, day).show()
-            }
-
-            else{
+            } else {
                 ChecksManager.requestDrawOverlayPermission(requireActivity())
             }
 
@@ -196,22 +204,27 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                         val goodWeather = "Good Weather, Enjoy"
 
                         val desc =
-                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts[0].description == null) {
+                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts!![0].description == null) {
 
                                 goodWeather
                             } else {
 
-                                result.data.alerts[0].description
+                                result.data.alerts!![0].description
                             }
 
                         val currentAlert = result.data.alerts?.get(0)
 
-                        if ( currentAlert != null){
+                        if (currentAlert != null) {
                             alertViewModel.insertAlert(currentAlert)
 
-                        }
-                        else{
-                            val emptyAlert = Alert(senderName = "No Alerts", event = "No Events", start = 0, end = 0, description = "Good Weather Enjoy")
+                        } else {
+                            val emptyAlert = Alert(
+                                senderName = "No Alerts",
+                                event = "No Events",
+                                start = 0,
+                                end = 0,
+                                description = "Good Weather Enjoy"
+                            )
                             alertViewModel.insertAlert(emptyAlert)
                         }
 
@@ -219,21 +232,21 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
 
                         withContext(Dispatchers.Main) {
-                            Log.d(TAG, "current Alert: ${alertViewModel.getAllAlerts()} ")
+
                             lifecycleScope.launch {
-                                if(result.data.alerts.isNullOrEmpty()){
-                                    alertViewModel.currentAlert.collectLatest{
-                                        alertAdapter.submitList(it)
+                                alertViewModel.allAlerts.collect {
+                                    if (result.data.alerts.isNullOrEmpty()) {
+                                        alertViewModel.allAlerts.collectLatest {
+                                            alertAdapter.submitList(it)
+                                        }
+
+
+                                    } else {
+                                        alertAdapter.submitList(result.data.alerts)
                                     }
-
-
                                 }
-                                else{
-                                    alertAdapter.submitList(result.data.alerts)
-                                }
+
                             }
-
-
                             broadcastIntent = Intent(
                                 requireActivity().applicationContext,
                                 NotificationReceiver::class.java
