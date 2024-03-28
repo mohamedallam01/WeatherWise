@@ -10,7 +10,6 @@ import com.example.weatherwise.model.FavoriteWeather
 import com.example.weatherwise.model.WeatherResponse
 
 @Database([WeatherResponse::class,Alert::class,FavoriteWeather::class], version = 1)
-
 @TypeConverters(Converters::class)
 abstract class WeatherDatabase : RoomDatabase() {
 
