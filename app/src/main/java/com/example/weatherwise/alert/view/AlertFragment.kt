@@ -49,6 +49,7 @@ import java.util.Locale
 
 class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     TimePickerDialog.OnTimeSetListener {
+
     private val TAG = "AlertFragment"
 
 
@@ -119,7 +120,6 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         alertViewModel =
             ViewModelProvider(this, alertViewModelFactory).get(AlertViewModel::class.java)
 
-        Log.d(TAG, "current Alert: ${alertViewModel.getAllAlerts()} ")
         lifecycleScope.launch {
             alertViewModel.allAlerts.collect {
                 alertAdapter.submitList(it)

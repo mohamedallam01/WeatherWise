@@ -24,6 +24,8 @@ import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.github.matteobattilana.weather.PrecipType
+import com.github.matteobattilana.weather.WeatherView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -46,6 +48,8 @@ class DetailsFavoriteFragment : Fragment() {
     private lateinit var rvHourly: RecyclerView
     private lateinit var rvDaily: RecyclerView
     private lateinit var homeDailyAdapter: HomeDailyAdapter
+    private lateinit var weatherViewFavDetails : WeatherView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -91,6 +95,8 @@ class DetailsFavoriteFragment : Fragment() {
         tvClouds = view.findViewById(R.id.tv_clouds_desc)
         cvDetails = view.findViewById(R.id.cv_details)
         cvDetails.visibility = View.GONE
+        weatherViewFavDetails = view.findViewById(R.id.weather_view_favorite_details)
+
 
         homeHourlyAdapter = HomeHourlyAdapter(requireContext())
         rvHourly.adapter = homeHourlyAdapter
@@ -130,6 +136,14 @@ class DetailsFavoriteFragment : Fragment() {
                         setHomeData(result.data)
                         homeHourlyAdapter.submitList(result.data.hourly)
                         homeDailyAdapter.submitList(result.data.daily)
+
+                        when (result.data.current.weather[0].main) {
+                            "Rain" -> weatherViewFavDetails.setWeatherData(PrecipType.RAIN)
+                            "Snow" -> weatherViewFavDetails.setWeatherData(PrecipType.SNOW)
+                            "Clear" -> weatherViewFavDetails.setWeatherData(
+                                PrecipType.CLEAR
+                            )
+                        }
                     }
 
                     is ApiState.Failure -> {

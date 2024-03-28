@@ -20,6 +20,7 @@ import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.github.matteobattilana.weather.WeatherView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 

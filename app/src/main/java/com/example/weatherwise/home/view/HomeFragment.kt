@@ -16,6 +16,7 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
@@ -34,6 +35,8 @@ import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.example.weatherwise.util.GPS
 import com.example.weatherwise.util.INITIAL_CHOICE
 import com.example.weatherwise.util.INITIAL_PREFS
+import com.github.matteobattilana.weather.PrecipType
+import com.github.matteobattilana.weather.WeatherView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
@@ -76,6 +79,7 @@ class HomeFragment : Fragment() {
     private lateinit var locationSharedPreferences: SharedPreferences
     private lateinit var prefsSharedPreferences: SharedPreferences
     private lateinit var initialSharedPreferences: SharedPreferences
+    private lateinit var weatherViewHome: WeatherView
     private var tempUnitFromPrefs: String? = ""
     private var languageFromPrefs: String = ""
     private var mapFragmentKey = ""
@@ -115,6 +119,7 @@ class HomeFragment : Fragment() {
         tvPressure = view.findViewById(R.id.tv_pressure_desc)
         tvClouds = view.findViewById(R.id.tv_clouds_desc)
         cvDetails = view.findViewById(R.id.cv_details)
+        weatherViewHome = view.findViewById(R.id.weather_view_home)
         cvDetails.visibility = View.GONE
 
 
@@ -200,6 +205,14 @@ class HomeFragment : Fragment() {
                         setHomeData(result.data)
                         homeHourlyAdapter.submitList(result.data.hourly)
                         homeDailyAdapter.submitList(result.data.daily)
+
+                        when (result.data.current.weather[0].main) {
+                            "Rain", "shower rain" -> weatherViewHome.setWeatherData(PrecipType.RAIN)
+                            "Snow" -> weatherViewHome.setWeatherData(PrecipType.SNOW)
+                            "Clear" -> weatherViewHome.setWeatherData(
+                                PrecipType.CLEAR
+                            )
+                        }
                     }
 
                     is ApiState.Failure -> {
@@ -238,6 +251,7 @@ class HomeFragment : Fragment() {
         val windSpeed = weatherResponse.current.wind_speed
         val pressure = weatherResponse.current.pressure
         val clouds = weatherResponse.current.clouds
+
 
 
         cvDetails.visibility = View.VISIBLE

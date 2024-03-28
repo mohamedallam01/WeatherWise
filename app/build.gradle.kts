@@ -41,6 +41,10 @@ android {
             enableSplit = false
         }
     }
+
+    buildFeatures{
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -117,6 +121,11 @@ dependencies {
     //kotlinx-coroutines
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutine_version")
     androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutine_version")
+
+
+    //Weather View
+    implementation ("com.github.MatteoBattilana:WeatherView:3.0.0")
+
 
 
     implementation("androidx.preference:preference:1.2.1")
