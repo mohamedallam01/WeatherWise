@@ -30,7 +30,7 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
     private val _favWeatherDetails: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
     val favWeatherDetails: StateFlow<ApiState> = _favWeatherDetails
-    fun setFavDetailsLocation(lat: String, lon: String, language: String, units: String) {
+    fun setFavDetailsLocation(lat: String, lon: String, language: String = "en", units: String = "metric") {
 
         getFavoriteWeatherDetailsFromRemote(lat,lon,language,units)
     }
@@ -49,11 +49,11 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
 
 
-     private fun getFavoriteWeatherDetailsFromRemote(
+      fun getFavoriteWeatherDetailsFromRemote(
         lat: String,
         lon: String,
-        language: String,
-        units: String
+        language: String = "en",
+        units: String = "metric"
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {

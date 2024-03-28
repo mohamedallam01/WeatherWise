@@ -28,16 +28,16 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
     private val _currentAlert: MutableStateFlow<List<Alert>> = MutableStateFlow(emptyList<Alert>())
     val currentAlert: StateFlow<List<Alert>> = _currentAlert.asStateFlow()
 
-    fun setAlertLocation(lat: String, lon: String, language: String, units: String) {
+    fun setAlertLocation(lat: String, lon: String, language: String = "", units: String = "") {
         getAlertWeather(lat, lon, language, units)
     }
 
 
-    private fun getAlertWeather(
-        lat: String,
-        lon: String,
-        language: String,
-        units: String
+     fun getAlertWeather(
+        lat: String ,
+        lon: String  ,
+        language: String = "" ,
+        units: String = ""
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {

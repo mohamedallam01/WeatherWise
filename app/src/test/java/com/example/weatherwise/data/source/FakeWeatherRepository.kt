@@ -9,11 +9,12 @@ import kotlinx.coroutines.flow.Flow
 
 class FakeWeatherRepository : WeatherRepo {
 
-    var weatherServiceData: LinkedHashMap<String, WeatherResponse> = LinkedHashMap()
+    private var localDataSource: FakeLocalDataSource = FakeLocalDataSource()
+    private lateinit var remoteDataSource: FakeRemoteDataSource
 
     private val observableWeathers = MutableLiveData<Result<List<WeatherResponse>>>()
     override fun getWeatherResponse(): Flow<WeatherResponse> {
-        TODO("Not yet implemented")
+        return localDataSource.getWeatherResponse()
     }
 
     override fun getCurrentWeatherFromRemote(
@@ -38,7 +39,7 @@ class FakeWeatherRepository : WeatherRepo {
     }
 
     override suspend fun insertFavorite(favoriteWeather: FavoriteWeather) {
-        TODO("Not yet implemented")
+        localDataSource.insertFavorite(favoriteWeather)
     }
 
     override suspend fun deleteAlert(alert: Alert) {

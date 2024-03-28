@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class WeatherLocalDataSourceTest {
+
     lateinit var database: WeatherDatabase
     lateinit var localDataSource: WeatherLocalDataSource
     lateinit var dao: WeatherDao
@@ -61,7 +62,6 @@ class WeatherLocalDataSourceTest {
         val job =launch {
             result.collect{
                 assertThat(result, not(nullValue()))
-                assertThat(result, `is`(1))
                 assertThat(result, `is`(weatherResponse1))
             }
         }
@@ -84,7 +84,6 @@ class WeatherLocalDataSourceTest {
         val job =launch {
             result.collect{
                 assertThat(result, not(nullValue()))
-                assertThat(result, `is`(1))
                 assertThat(result, `is`(alert1))
             }
         }
@@ -107,13 +106,11 @@ class WeatherLocalDataSourceTest {
         val job =launch {
             result1.collect{
                 assertThat(result1, not(nullValue()))
-                assertThat(result1, `is`(1))
                 assertThat(result1, `is`(favorite1))
             }
 
             result2.collect{
                 assertThat(result2, not(nullValue()))
-                assertThat(result2, `is`(1))
                 assertThat(result2, `is`(favorite1))
             }
         }
