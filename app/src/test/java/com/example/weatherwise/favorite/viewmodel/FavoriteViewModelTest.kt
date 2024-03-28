@@ -2,24 +2,17 @@ package com.example.weatherwise.favorite.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.getOrAwaitValue
-import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.data.source.FakeWeatherRepository
-import com.example.weatherwise.model.Alert
+import com.example.weatherwise.map.viewmodel.MapViewModel
 import com.example.weatherwise.model.FavoriteWeather
 import com.example.weatherwise.network.ApiState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -29,9 +22,9 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class FavoriteViewModelTest {
-    lateinit var viewModel: FavoriteViewModel
+    lateinit var favViewModel: FavoriteViewModel
+    lateinit var mapViewModel: MapViewModel
     lateinit var repository: FakeWeatherRepository
-
 
 
     @get:Rule
@@ -41,7 +34,8 @@ class FavoriteViewModelTest {
     @Before
     fun setUp() {
         repository = FakeWeatherRepository()
-        viewModel = FavoriteViewModel(repository)
+        favViewModel = FavoriteViewModel(repository)
+        mapViewModel = MapViewModel(repository)
         Dispatchers.setMain(Dispatchers.Unconfined)
 
     }
@@ -60,10 +54,10 @@ class FavoriteViewModelTest {
         val longitude = "122"
 
         //When
-        viewModel.setFavDetailsLocation(latitude, longitude)
+        favViewModel.setFavDetailsLocation(latitude, longitude)
 
         //Waiting
-        val result = viewModel.favWeatherDetails
+        val result = favViewModel.favWeatherDetails
 
         //Then
         assertThat(result, not(nullValue()))
@@ -76,10 +70,10 @@ class FavoriteViewModelTest {
     fun `get favorite weather from database, favorite1, the same favorite1`() {
 
         // When
-        viewModel.getFavoriteWeatherFromDataBase()
+        favViewModel.getFavoriteWeatherFromDataBase()
 
         // Wait until LiveData value is set
-        val result = viewModel.favoriteWeather
+        val result = favViewModel.favoriteWeather
 
         // Then
         assertThat(result, not(nullValue()))
@@ -94,29 +88,30 @@ class FavoriteViewModelTest {
             val longitude = "122"
 
             //When
-            viewModel.getFavoriteWeatherDetailsFromRemote(latitude, longitude)
+            favViewModel.getFavoriteWeatherDetailsFromRemote(latitude, longitude)
 
             //Then
-            assertThat(viewModel.favWeatherDetails.value, not(nullValue()))
-            assertThat(viewModel.favWeatherDetails.value, `is`(ApiState.Loading))
+            assertThat(favViewModel.favWeatherDetails.value, not(nullValue()))
+            assertThat(favViewModel.favWeatherDetails.value, `is`(ApiState.Loading))
 
         }
 
     @Test
-    fun `get favorite by id, favorite1, the same favorite`()  {
+    fun `get favorite by id, favorite1, the same favorite`() = runTest   {
 
         //Given
         val favorite1 = FavoriteWeather(1)
+        mapViewModel.insertFavoriteWeather(favorite1)
 
         //When
-         viewModel.getFavoriteById(favorite1.fav_id)
+         favViewModel.getFavoriteById(favorite1.fav_id)
 
         //Waiting
-        val result = viewModel.favoriteWeatherById
+        val result = favViewModel.favoriteWeatherById.value
 
         //Then
         assertThat(result, not(nullValue()))
-        assertThat(result, `is`(favorite1.fav_id))
+        assertThat(result, `is`(favorite1))
 
     }
 
