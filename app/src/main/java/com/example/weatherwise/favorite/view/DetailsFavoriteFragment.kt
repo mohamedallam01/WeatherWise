@@ -24,6 +24,7 @@ import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -102,14 +103,18 @@ class DetailsFavoriteFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         favoriteViewModel.getFavoriteById(favoriteId)
-        var latitude = ""
-        var longitude = ""
-        favoriteViewModel.favoriteWeatherById.observe(viewLifecycleOwner){favoriteWeatherDetails ->
-             latitude = favoriteWeatherDetails.lat.toString()
-             longitude = favoriteWeatherDetails.lon.toString()
-            favoriteViewModel.setFavDetailsLocation(latitude,longitude,"en","metric")
 
+        lifecycleScope.launch {
+            var latitude = ""
+            var longitude = ""
+            favoriteViewModel.favoriteWeatherById.collect{favoriteWeatherDetails ->
+                latitude = favoriteWeatherDetails.lat.toString()
+                longitude = favoriteWeatherDetails.lon.toString()
+                favoriteViewModel.setFavDetailsLocation(latitude,longitude,"en","metric")
+
+            }
         }
+
 
         lifecycleScope.launch {
             favoriteViewModel.favWeatherDetails.collectLatest { result ->

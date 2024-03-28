@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +21,7 @@ import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 
 
 const val FAVORITE_FRAGMENT = "favorite_fragment"
@@ -82,9 +84,12 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
             ViewModelProvider(this, favoriteViewModelFactory).get(FavoriteViewModel::class.java)
 
         favoriteViewModel.getFavoriteWeatherFromDataBase()
-        favoriteViewModel.favoriteWeather.observe(viewLifecycleOwner) {
-            favoriteAdapter.submitList(it)
+        lifecycleScope.launch {
+            favoriteViewModel.favoriteWeather.collect {
+                favoriteAdapter.submitList(it)
+            }
         }
+
     }
 
     override fun moveToDetails(favoriteId: Int) {

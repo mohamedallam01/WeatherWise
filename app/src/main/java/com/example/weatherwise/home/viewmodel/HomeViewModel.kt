@@ -22,7 +22,7 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
     private val TAG = "HomeViewModel"
 
     private val _currentWeather: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
-    val currentWeather: StateFlow<ApiState> = _currentWeather
+    val currentWeather = _currentWeather.asStateFlow()
 
     fun setCurrentLocation(lat: String, lon: String, language: String, units: String) {
         getCurrentWeatherFromDatabase(lat, lon, language, units)

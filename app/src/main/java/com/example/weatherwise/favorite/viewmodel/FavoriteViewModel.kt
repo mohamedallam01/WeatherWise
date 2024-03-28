@@ -13,19 +13,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
     private val TAG = "FavoriteViewModel"
 
-    private val _favoriteWeather: MutableLiveData<List<FavoriteWeather>> = MutableLiveData()
-    val favoriteWeather: LiveData<List<FavoriteWeather>> = _favoriteWeather
+    private val _favoriteWeather: MutableStateFlow<List<FavoriteWeather>> = MutableStateFlow(
+        emptyList()
+    )
+    val favoriteWeather = _favoriteWeather.asStateFlow()
 
-    private val _favoriteWeatherById: MutableLiveData<FavoriteWeather> = MutableLiveData()
-    val favoriteWeatherById: LiveData<FavoriteWeather> = _favoriteWeatherById
+    private val _favoriteWeatherById: MutableStateFlow<FavoriteWeather> = MutableStateFlow(FavoriteWeather())
+    val favoriteWeatherById = _favoriteWeatherById.asStateFlow()
 
 
     private val _favWeatherDetails: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
@@ -40,9 +44,9 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             _repo.getAllFavorites().collect {
-                _favoriteWeather.postValue(it)
-                Log.d(TAG, "get Favorite Weather From database: ${favoriteWeather.value}")
+                _favoriteWeather.value = it
             }
+            Timber.tag(TAG).d("get Favorite Weather From database: %s", favoriteWeather.value)
         }
 
     }
@@ -78,7 +82,7 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
     fun getFavoriteById(favoriteId : Int){
         viewModelScope.launch {
             _repo.getFavoriteById(favoriteId).collect{
-                _favoriteWeatherById.postValue(it)
+                _favoriteWeatherById.value = it
 
             }
         }
