@@ -3,6 +3,7 @@ package com.example.weatherwise.home.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import android.location.Geocoder
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -44,6 +45,9 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 const val LOCATION = "Location"
@@ -82,8 +86,10 @@ class HomeFragment : Fragment() {
     private lateinit var weatherViewHome: WeatherView
     private var tempUnitFromPrefs: String? = ""
     private var languageFromPrefs: String = ""
-    private var mapFragmentKey = ""
     private var locationInitialPrefs = ""
+    private lateinit var latitudeFromPrefs: String
+    private lateinit var longitudeFromPrefs: String
+    private lateinit var tvDateTime : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,6 +127,7 @@ class HomeFragment : Fragment() {
         cvDetails = view.findViewById(R.id.cv_details)
         weatherViewHome = view.findViewById(R.id.weather_view_home)
         cvDetails.visibility = View.GONE
+        tvDateTime = view.findViewById(R.id.tv_date_time)
 
 
 
@@ -190,6 +197,10 @@ class HomeFragment : Fragment() {
             TAG, "initial choice: $locationInitialPrefs"
         )
 
+        latitudeFromPrefs =
+            locationSharedPreferences.getString(LATITUDE, "No saved Latitude").toString()
+        longitudeFromPrefs =
+            locationSharedPreferences.getString(LONGITUDE, "No saved Longitude").toString()
 
         lifecycleScope.launch {
             homeViewModel.currentWeather.collectLatest { result ->
@@ -244,7 +255,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun setHomeData(weatherResponse: WeatherResponse) {
-        val address = weatherResponse.timezone
+
+        val dateTime = weatherResponse.current.dt
         val tempDegree = weatherResponse.current.temp
         val main = weatherResponse.current.weather[0].main
         val humidity = weatherResponse.current.humidity
@@ -252,10 +264,21 @@ class HomeFragment : Fragment() {
         val pressure = weatherResponse.current.pressure
         val clouds = weatherResponse.current.clouds
 
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        val addresses =
+            geocoder.getFromLocation(
+                latitudeFromPrefs.toDouble(),
+                longitudeFromPrefs.toDouble(),
+                1
+            )!!
 
+        val address = addresses[0]
 
+        val city = address.locality
         cvDetails.visibility = View.VISIBLE
-        tvAddress.text = address
+        tvAddress.text = city
+        val realDateTime = convertTimestampToDate(dateTime)
+        tvDateTime.text = realDateTime
         when (tempUnitFromPrefs) {
             KELVIN -> {
                 tvTempDegree.text = "$tempDegree °K"
@@ -276,9 +299,12 @@ class HomeFragment : Fragment() {
 
         }
         tvMain.text = main
-        tvHumidity.text = humidity.toString()
-        tvPressure.text = pressure.toString()
-        tvClouds.text = clouds.toString()
+        val humidityUnit = getString(R.string.humidity_unit)
+        tvHumidity.text = "$humidity $humidityUnit"
+        val pressureUnit = getString(R.string.pressure_unit)
+        tvPressure.text = "$pressure $pressureUnit"
+        val cloudUnit = getString(R.string.cloud_unit)
+        tvClouds.text = "$clouds $cloudUnit"
 
 
     }
@@ -305,13 +331,6 @@ class HomeFragment : Fragment() {
 
                     locationSharedPreferences.edit().putString(LATITUDE, latitude).apply()
                     locationSharedPreferences.edit().putString(LONGITUDE, longitude).apply()
-
-
-                    val latitudeFromPrefs =
-                        locationSharedPreferences.getString(LATITUDE, "No saved Latitude")
-                    val longitudeFromPrefs =
-                        locationSharedPreferences.getString(LONGITUDE, "No saved Longitude")
-
 
 
                     tempUnitFromPrefs =
@@ -347,15 +366,7 @@ class HomeFragment : Fragment() {
                             tempUnit
                         )
                     }
-//                    val response = homeViewModel.currentWeather.value
-//                    Log.d(TAG, "result: $response ")
 
-
-//                    geocoder =
-//                        Geocoder(requireContext()).getFromLocation(30.070988580730607,31.372045263829136, 1)!!
-//
-//
-//                     Log.d(TAG, "Geocoder: $geocoder")
                     fusedLocationProviderClient.removeLocationUpdates(this)
 
                 }
@@ -406,6 +417,12 @@ class HomeFragment : Fragment() {
         }
 
 
+    }
+
+    private fun convertTimestampToDate(timeStamp: Long): String {
+        val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault())
+        val date = Date(timeStamp * 1000)
+        return simpleDateFormat.format(date)
     }
 
 

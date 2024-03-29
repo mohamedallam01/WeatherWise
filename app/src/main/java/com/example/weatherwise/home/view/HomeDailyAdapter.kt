@@ -1,6 +1,7 @@
 package com.example.weatherwise.home.view
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,13 +14,19 @@ import com.bumptech.glide.Glide
 import com.example.weatherwise.R
 import com.example.weatherwise.model.DailyForecast
 import com.example.weatherwise.model.HourlyForecast
+import com.example.weatherwise.preferences.LANG_KEY
+import com.example.weatherwise.preferences.PREFS
+import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class HomeDailyAdapter (private val context: Context) :
+class HomeDailyAdapter(private val context: Context) :
     ListAdapter<DailyForecast, DailyViewHolder>(DailyDiffUtil()) {
 
+    private lateinit var prefsSharedPreferences: SharedPreferences
+    private var tempUnitFromPrefs: String? = ""
+    private var languageFromPrefs: String = ""
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DailyViewHolder {
         val inflater: LayoutInflater = LayoutInflater.from(parent.context)
         val view: View = inflater.inflate(R.layout.daily_item, parent, false)
@@ -29,6 +36,13 @@ class HomeDailyAdapter (private val context: Context) :
     override fun onBindViewHolder(holder: DailyViewHolder, position: Int) {
         val dailyForecast: DailyForecast = getItem(position)
 
+        prefsSharedPreferences =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        tempUnitFromPrefs =
+            prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+        languageFromPrefs =
+            prefsSharedPreferences.getString(LANG_KEY, "No Saved Language").toString()
+
         val day = convertTimestampToday(dailyForecast.dt)
         val icon = convertIconCode(dailyForecast.weather[0].icon)
 
@@ -36,7 +50,25 @@ class HomeDailyAdapter (private val context: Context) :
         holder.descDaily.text = dailyForecast.weather[0].description
         val max = dailyForecast.temp.max
         val min = dailyForecast.temp.min
-        holder.tempDaily.text = "$max \\ $min"
+        val fullTempDaily = "$max \\ $min"
+
+        when (tempUnitFromPrefs) {
+            KELVIN -> {
+                holder.tempDaily.text = "$fullTempDaily °K"
+            }
+
+            FAHRENHEIT -> {
+                holder.tempDaily.text = "$fullTempDaily °F"
+
+            }
+
+            else -> {
+                holder.tempDaily.text = "$fullTempDaily °C"
+
+
+            }
+
+        }
 
 
 
@@ -54,7 +86,7 @@ fun convertTimestampToday(timestamp: Long): String {
     return dateFormat.format(date)
 }
 
-private fun convertIconCode(code : String) : String{
+private fun convertIconCode(code: String): String {
     return "https://openweathermap.org/img/wn/$code@2x.png"
 }
 

@@ -19,39 +19,50 @@
             android:id="@+id/tv_day_daily"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tomorrow" />
 
-        <ImageView
-            android:id="@+id/iv_icon_daily"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="32dp"
-            android:contentDescription="@string/weather_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tv_day_daily"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteY="0dp"
-            tools:src="@drawable/common_google_signin_btn_icon_dark" />
-
-        <TextView
-            android:id="@+id/tv_desc_daily"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_icon_daily"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="70dp"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Cloudy" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            >
+
+            <ImageView
+                android:id="@+id/iv_icon_daily"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginStart="32dp"
+                android:contentDescription="@string/weather_icon"
+                tools:src="@drawable/common_google_signin_btn_icon_dark" />
+
+            <TextView
+                android:id="@+id/tv_desc_daily"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                tools:text="Cloudy" />
+
+
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/tv_full_temp_daily"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
