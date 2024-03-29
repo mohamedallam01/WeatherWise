@@ -8,11 +8,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherwise.R
 import com.example.weatherwise.favorite.view.FAVORITE_FRAGMENT
 import com.example.weatherwise.favorite.view.FavoriteFragmentDirections
 import com.example.weatherwise.home.view.HomeFragmentDirections
+import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.map.view.MapFragment
 import com.example.weatherwise.preferences.LOCATION_GPS_KEY
 import com.example.weatherwise.preferences.PREFS
@@ -29,6 +31,7 @@ class InitialSetupDialog : DialogFragment() {
 
     private val TAG = "InitialSetupDialog"
 
+    private val homeViewModel: HomeViewModel by activityViewModels()
     private var positiveButtonListener: DialogInterface.OnClickListener? = null
     lateinit var initialPrefs: SharedPreferences
     lateinit var prefs: SharedPreferences
@@ -54,7 +57,7 @@ class InitialSetupDialog : DialogFragment() {
                 if (selected == LOCATION) {
                     val action = HomeFragmentDirections.actionHomeFragmentToMapFragment3(HOME_FRAGMENT)
                     findNavController().navigate(action)
-                }
+                } else homeViewModel.setCurrentSettings(selected)
                 Log.d(TAG, "selected: $selected ")
             }
             .setSingleChoiceItems(

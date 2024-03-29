@@ -15,8 +15,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -64,8 +68,7 @@ class HomeFragment : Fragment() {
 
     private val TAG = "HomeFragment"
 
-    private lateinit var homeViewModel: HomeViewModel
-    private lateinit var homeViewModelFactory: HomeViewModelFactory
+    private val homeViewModel: HomeViewModel by activityViewModels()
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var progressBar: ProgressBar
     private lateinit var tvAddress: TextView
@@ -141,15 +144,6 @@ class HomeFragment : Fragment() {
         rvDaily.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-        homeViewModelFactory = HomeViewModelFactory(
-            WeatherRepoImpl.getInstance(
-                WeatherRemoteDataSourceImpl.getInstance(),
-                WeatherLocalDataSourceImpl(requireContext())
-
-            )
-        )
-
-        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
 
 //        val homeArgs = HomeFragmentArgs.fromBundle(requireArguments())
 //        mapFragmentKey = homeArgs.mapFragemnt
@@ -178,10 +172,22 @@ class HomeFragment : Fragment() {
         locationInitialPrefs =
             initialSharedPreferences.getString(INITIAL_CHOICE, "No Location").toString()
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED){
+            homeViewModel.currentLocationSetting.collectLatest {
+               getFreshLocation()
+            }
+        }}
     }
 
     override fun onResume() {
         super.onResume()
+
+        getWeatherData()
+
+    }
+
+    private fun getWeatherData(){
 
         Log.d(TAG, "onResume: ")
 
@@ -198,9 +204,9 @@ class HomeFragment : Fragment() {
         )
 
         latitudeFromPrefs =
-            locationSharedPreferences.getString(LATITUDE, "No saved Latitude").toString()
+            locationSharedPreferences.getString(LATITUDE, null).toString()
         longitudeFromPrefs =
-            locationSharedPreferences.getString(LONGITUDE, "No saved Longitude").toString()
+            locationSharedPreferences.getString(LONGITUDE, null).toString()
 
         lifecycleScope.launch {
             homeViewModel.currentWeather.collectLatest { result ->
@@ -239,8 +245,8 @@ class HomeFragment : Fragment() {
 
 
         }
-
     }
+
 
     override fun onStart() {
         super.onStart()
@@ -334,10 +340,11 @@ class HomeFragment : Fragment() {
 
 
                     tempUnitFromPrefs =
-                        prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+                        prefsSharedPreferences.getString(TEMP_UNIT_KEY, "metric")
                     languageFromPrefs =
-                        prefsSharedPreferences.getString(LANG_KEY, "No Saved Language").toString()
+                        prefsSharedPreferences.getString(LANG_KEY, "en").toString()
 
+                    getWeatherData()
 
                     val tempUnit = when (tempUnitFromPrefs) {
                         KELVIN -> STANDARD
@@ -382,16 +389,16 @@ class HomeFragment : Fragment() {
 
 
         val latitudeFromPrefs =
-            locationSharedPreferences.getString(LATITUDE, "No saved Latitude")
+            locationSharedPreferences.getString(LATITUDE, null)
         val longitudeFromPrefs =
-            locationSharedPreferences.getString(LONGITUDE, "No saved Longitude")
+            locationSharedPreferences.getString(LONGITUDE, null)
 
 
 
         tempUnitFromPrefs =
-            prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
+            prefsSharedPreferences.getString(TEMP_UNIT_KEY, "metric")
         languageFromPrefs =
-            prefsSharedPreferences.getString(LANG_KEY, "No Saved Language").toString()
+            prefsSharedPreferences.getString(LANG_KEY, "en").toString()
 
 
         val tempUnit = when (tempUnitFromPrefs) {

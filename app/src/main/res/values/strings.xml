@@ -57,4 +57,5 @@
     <string name="cloud_unit">%</string>
     <string name="weather_wise_splash_screen">Weather Wise Splash Screen</string>
     <string name="weather_wise">WeatherWise</string>
+    <string name="delete_alert">Delete Alert</string>
 </resources>

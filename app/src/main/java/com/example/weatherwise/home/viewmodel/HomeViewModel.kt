@@ -24,6 +24,14 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
     private val _currentWeather: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
     val currentWeather = _currentWeather.asStateFlow()
 
+    private val _currentLocationSetting : MutableStateFlow<String?> = MutableStateFlow(null)
+    val currentLocationSetting = _currentLocationSetting.asStateFlow()
+
+
+    fun setCurrentSettings(setting : String){
+        _currentLocationSetting.value = setting
+    }
+
     fun setCurrentLocation(lat: String, lon: String, language: String, units: String) {
         getCurrentWeatherFromDatabase(lat, lon, language, units)
     }
