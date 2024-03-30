@@ -10,13 +10,16 @@
     <item
         android:id="@+id/alert"
         android:title="@string/alert"
-        android:icon="@drawable/baseline_add_alert_24"/>
+        android:icon="@drawable/baseline_add_alert_24"
+        />
     <item
         android:id="@+id/favorite"
         android:title="@string/favorite"
-        android:icon="@drawable/baseline_favorite_24"/>
+        android:icon="@drawable/baseline_favorite_24"
+        />
     <item
         android:id="@+id/settings"
         android:title="@string/settings"
-        android:icon="@drawable/baseline_settings_24"/>
+        android:icon="@drawable/baseline_settings_24"
+        />
 </menu>

@@ -8,6 +8,8 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -31,11 +33,16 @@ import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.view.HomeHourlyAdapter
+import com.example.weatherwise.home.view.LATITUDE
+import com.example.weatherwise.home.view.LOCATION
+import com.example.weatherwise.home.view.LONGITUDE
 import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.getAddress
+import com.example.weatherwise.util.round
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -44,11 +51,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 
 class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
-    TimePickerDialog.OnTimeSetListener {
+    TimePickerDialog.OnTimeSetListener, OnAlertClickListener {
 
     private val TAG = "AlertFragment"
 
@@ -68,17 +76,28 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     private var savedHour: Int = 0
     private var savedMinute: Int = 0
 
+    private lateinit var sdf: SimpleDateFormat
+    private lateinit var calendar: Calendar
+
     private lateinit var alertViewModel: AlertViewModel
     private lateinit var alertViewModelFactory: AlertViewModelFactory
 
     private lateinit var pendingIntent: PendingIntent
 
     private lateinit var broadcastIntent: Intent
+    private lateinit var locationSharedPreferences: SharedPreferences
+
+    private var latitudeFromPrefs: String? = null
+    private var longitudeFromPrefs: String? = null
+
+    var alertId: Int? = null
 
     val calender = Calendar.getInstance()
 
     private lateinit var rvAlerts: RecyclerView
     private lateinit var alertAdapter: AlertAdapter
+    private var insertedAlert: Alert? = null
+    private lateinit var alarmManager: AlarmManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,7 +120,10 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         fabAddAlert = view.findViewById(R.id.fab_add_alert)
         rvAlerts = view.findViewById(R.id.rv_alerts)
 
-        alertAdapter = AlertAdapter(requireContext())
+        locationSharedPreferences =
+            requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
+
+        alertAdapter = AlertAdapter(requireContext(), this)
         rvAlerts.adapter = alertAdapter
         rvAlerts.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -155,16 +177,42 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         Log.d(TAG, "timeInMillis: $timeInMillis ")
 
 
-        scheduleNotification(timeInMillis)
+
+        lifecycleScope.launch {
+            latitudeFromPrefs =
+                locationSharedPreferences.getString(LATITUDE, null)
+            longitudeFromPrefs =
+                locationSharedPreferences.getString(LONGITUDE, null)
+
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val address =
+                geocoder.getAddress(
+                    latitudeFromPrefs?.toDouble()?.round(4) ?: 0.0,
+                    longitudeFromPrefs?.toDouble()?.round(4) ?: 0.0
+                )!!
+            val city = address.locality ?: address.extras.getString("sub-admin", "Unknown area")
+            val dateAndTime = sdf.format(calendar.time).split(" ")
+
+            withContext(Dispatchers.Main) {
+                insertedAlert = Alert(location = city, date = dateAndTime[0], time = dateAndTime[1])
+                alertViewModel.insertAlert(insertedAlert)
+                scheduleNotification(timeInMillis)
+
+            }
+
+
+        }
+
+
     }
 
 
     private fun getDateTimeCalender(): Long {
-        val calendar = Calendar.getInstance()
+        calendar = Calendar.getInstance()
 
         calendar.set(savedYear, savedMonth, savedDay, savedHour, savedMinute)
 
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         Log.d(TAG, "Chosen Date and Time: ${sdf.format(calendar.time)}")
 
         return calendar.timeInMillis
@@ -179,6 +227,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                 month = calender.get(Calendar.MONTH)
                 day = calender.get(Calendar.DAY_OF_MONTH)
                 DatePickerDialog(requireContext(), this, year, month, day).show()
+
+
             } else {
                 ChecksManager.requestDrawOverlayPermission(requireActivity())
             }
@@ -188,118 +238,40 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
-        alertViewModel.setAlertLocation("33.44", "-94.04", "en", "metric")
-        lifecycleScope.launch {
-            alertViewModel.alertWeather.collect { result ->
+        broadcastIntent = Intent(
+            requireActivity().applicationContext,
+            NotificationReceiver::class.java
+        )
 
-                when (result) {
-                    is ApiState.Loading -> {
-                        //progressBar.visibility = View.VISIBLE
-                    }
+        alertId = insertedAlert?.id?.toInt()
 
-                    is ApiState.Success -> {
-                        //progressBar.visibility = View.GONE
+        pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            alertId!!, broadcastIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
 
-                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
-                        val goodWeather = "Good Weather, Enjoy"
+        alarmManager =
+            requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-                        val desc =
-                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts!![0].description == null) {
-
-                                goodWeather
-                            } else {
-
-                                result.data.alerts!![0].description
-                            }
-
-                        val currentAlert = result.data.alerts?.get(0)
-
-                        if (currentAlert != null) {
-                            alertViewModel.insertAlert(currentAlert)
-
-                        } else {
-                            val emptyAlert = Alert(
-                                senderName = "No Alerts",
-                                event = "No Events",
-                                start = 0,
-                                end = 0,
-                                description = "Good Weather Enjoy"
-                            )
-                            alertViewModel.insertAlert(emptyAlert)
-                        }
-
-
-
-
-                        withContext(Dispatchers.Main) {
-
-                            lifecycleScope.launch {
-                                alertViewModel.allAlerts.collect {
-                                    if (result.data.alerts.isNullOrEmpty()) {
-                                        alertViewModel.allAlerts.collectLatest {
-                                            alertAdapter.submitList(it)
-                                        }
-
-
-                                    } else {
-                                        alertAdapter.submitList(result.data.alerts)
-                                    }
-                                }
-
-                            }
-                            broadcastIntent = Intent(
-                                requireActivity().applicationContext,
-                                NotificationReceiver::class.java
-                            )
-                            broadcastIntent.putExtra(ALERT_DESC, desc)
-
-                            Log.d(TAG, "scheduleNotification: $desc")
-                            pendingIntent = PendingIntent.getBroadcast(
-                                requireContext(),
-                                NOTIFICATION_ID, broadcastIntent,
-                                PendingIntent.FLAG_IMMUTABLE
-                            )
-
-                            val alarmManager =
-                                requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                                alarmManager.setExactAndAllowWhileIdle(
-                                    AlarmManager.RTC_WAKEUP,
-                                    dateTimeInMillis,
-                                    pendingIntent
-                                )
-                            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                alarmManager.setExactAndAllowWhileIdle(
-                                    AlarmManager.RTC_WAKEUP,
-                                    dateTimeInMillis,
-                                    pendingIntent
-                                )
-                            } else {
-                                alarmManager.set(
-                                    AlarmManager.RTC_WAKEUP,
-                                    dateTimeInMillis,
-                                    pendingIntent
-                                )
-                            }
-
-                        }
-
-
-                    }
-
-                    is ApiState.Failure -> {
-                        //progressBar.visibility = View.GONE
-                        Log.d(TAG, "Exception is: ${result.msg}")
-                        Toast.makeText(requireActivity(), result.msg.toString(), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-
-                }
-            }
-
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
         }
 
 
@@ -322,5 +294,21 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     }
 
+    override fun deleteAlert(alert: Alert) {
+        lifecycleScope.launch {
+            alertViewModel.deleteAlert(alert)
+            pendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                alertId!!, broadcastIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            Log.d(TAG, "deleteAlert id: $alertId ")
+            alarmManager.cancel(pendingIntent)
+
+        }
+    }
+
 
 }
+
+

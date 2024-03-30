@@ -2,6 +2,7 @@ package com.example.weatherwise
 
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentContainerView
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
@@ -22,11 +24,14 @@ import androidx.navigation.ui.NavigationUI
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
+import com.example.weatherwise.model.WeatherRepoImpl
+import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.ChecksManager.enableLocationService
 import com.example.weatherwise.util.INITIAL_CHOICE
 import com.example.weatherwise.util.INITIAL_PREFS
 import com.example.weatherwise.util.InitialSetupDialog
+import com.example.weatherwise.util.setAppLocale
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 const val REQUEST_CODE = 2005
@@ -58,6 +63,16 @@ class MainActivity : AppCompatActivity() {
         fragment = findViewById(R.id.nav_host_fragment)
 
         Log.d(TAG, "onCreate: ")
+
+        homeViewModelFactory = HomeViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(this)
+            )
+        )
+
+        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
+
 
 
         initMainActivity()

@@ -18,7 +18,7 @@ interface WeatherRepo {
 
      suspend fun insertAlert(alert: Alert?)
      suspend fun insertFavorite(favoriteWeather: FavoriteWeather)
-     suspend fun deleteAlert(alert: Alert)
+     suspend fun deleteAlert(alert: Alert?)
 
      fun getFavoriteById(favoriteId : Int) :Flow<FavoriteWeather>
 }

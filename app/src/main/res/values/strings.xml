@@ -48,4 +48,14 @@
     <string name="tap_to_choose_a_specific_location_from_the_map">Tap to choose a specific location from the map</string>
     <string name="enable_to_get_location_automatically_using_gps">Enable to get location automatically using GPS</string>
     <string name="location_preferences">Location Preferences</string>
+    <string name="humidity_icon">Humidity Icon</string>
+    <string name="wind_speed_icon">Wind Speed Icon</string>
+    <string name="pressure_icon">Pressure Icon</string>
+    <string name="cloud_icon">Cloud Icon</string>
+    <string name="humidity_unit">%</string>
+    <string name="pressure_unit">hPa</string>
+    <string name="cloud_unit">%</string>
+    <string name="weather_wise_splash_screen">Weather Wise Splash Screen</string>
+    <string name="weather_wise">WeatherWise</string>
+    <string name="delete_alert">Delete Alert</string>
 </resources>

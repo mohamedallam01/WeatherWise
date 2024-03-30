@@ -12,10 +12,27 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.example.weatherwise.R
 import com.example.weatherwise.alert.ALERT_DESC
+import com.example.weatherwise.dp.WeatherLocalDataSource
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
+import com.example.weatherwise.model.Alert
+import com.example.weatherwise.model.WeatherRepo
+import com.example.weatherwise.model.WeatherRepoImpl
+import com.example.weatherwise.network.ApiState
+import com.example.weatherwise.network.WeatherRemoteDataSource
+import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DialogService : Service() {
 
@@ -23,7 +40,9 @@ class DialogService : Service() {
 
     private lateinit var windowManager: WindowManager
     private lateinit var floatingView: ConstraintLayout
-    private var desc : String? = ""
+    private var desc: String? = ""
+    private lateinit var _repo: WeatherRepo
+    private lateinit var tvDesc: TextView
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -31,14 +50,8 @@ class DialogService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent != null) {
-            desc = intent.getStringExtra(ALERT_DESC)
 
-            Log.d(TAG, "Description: $desc ")
 
-            val textView = floatingView.findViewById<TextView>(R.id.textView)
-            textView.text = desc
-        }
         return START_STICKY
     }
 
@@ -46,8 +59,27 @@ class DialogService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        floatingView =
+            LayoutInflater.from(this).inflate(R.layout.floating_dialog, null) as ConstraintLayout
+        tvDesc = floatingView.findViewById<TextView>(R.id.textView)
+        _repo = WeatherRepoImpl.getInstance(
+            WeatherRemoteDataSourceImpl.getInstance(),
+            WeatherLocalDataSourceImpl(this)
+        )
 
-        floatingView = LayoutInflater.from(this).inflate(R.layout.floating_dialog, null) as ConstraintLayout
+
+        CoroutineScope(Dispatchers.Main).launch {
+            _repo.getCurrentWeatherFromRemote("33.44","-94.04","en","metric").collectLatest { result ->
+                val goodWeather = "Good Weather, Enjoy"
+                desc = if (result.alerts.isNullOrEmpty() || result.alerts?.get(0)?.description.isNullOrEmpty()) {
+                    goodWeather
+                } else {
+                    result.alerts?.get(0)?.description ?: goodWeather
+                }
+                tvDesc.text = desc
+                Log.d(TAG, "description: $desc ")
+            }
+        }
 
 
         val params = WindowManager.LayoutParams(

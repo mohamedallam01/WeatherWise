@@ -11,13 +11,14 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.weatherwise.R
+import com.example.weatherwise.favorite.view.OnFavClickListener
 import com.example.weatherwise.model.Alert
 import com.example.weatherwise.model.DailyForecast
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class AlertAdapter (private val context: Context) :
+class AlertAdapter (private val context: Context,private val listener: OnAlertClickListener) :
     ListAdapter<Alert, AlertViewHolder>(AlertDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlertViewHolder {
@@ -29,9 +30,12 @@ class AlertAdapter (private val context: Context) :
     override fun onBindViewHolder(holder: AlertViewHolder, position: Int) {
         val alert: Alert = getItem(position)
 
-        holder.alertAddress.text = alert.senderName
-        holder.alertDate.text = alert.start.toString()
-        holder.alertTime.text = alert.end.toString()
+        holder.alertAddress.text = alert.location
+        holder.alertDate.text = alert.date
+        holder.alertTime.text = alert.time
+        holder.ivDeleteAlert.setOnClickListener {
+            listener.deleteAlert(alert)
+        }
 
 
     }
@@ -44,6 +48,7 @@ class AlertViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val alertAddress: TextView = itemView.findViewById(R.id.tv_alert_address)
     val alertDate: TextView = itemView.findViewById(R.id.tv_alert_date)
     val alertTime: TextView = itemView.findViewById(R.id.tv_alert_time)
+    val ivDeleteAlert : ImageView = itemView.findViewById(R.id.iv_delete_alert)
 
 
 }
