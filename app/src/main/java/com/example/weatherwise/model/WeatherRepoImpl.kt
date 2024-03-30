@@ -94,7 +94,7 @@ class WeatherRepoImpl  constructor(
         weatherLocalDataSource.insertFavorite(favoriteWeather)
     }
 
-    override suspend fun deleteAlert(alert: Alert) {
+    override suspend fun deleteAlert(alert: Alert?) {
         weatherLocalDataSource.deleteAlert(alert)
     }
 

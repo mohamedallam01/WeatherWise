@@ -71,6 +71,14 @@ class AlertViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
     }
 
+    fun deleteAlert(alert: Alert?){
+
+        viewModelScope.launch {
+            _repo.deleteAlert(alert)
+        }
+
+    }
+
 
     fun getAllAlerts() {
         viewModelScope.launch {
