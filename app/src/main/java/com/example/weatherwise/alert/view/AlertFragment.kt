@@ -102,6 +102,12 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        broadcastIntent = Intent(
+            requireActivity().applicationContext,
+            NotificationReceiver::class.java
+        )
+        alarmManager =
+            requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         createNotificationChannel()
     }
@@ -173,8 +179,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         Log.d(TAG, "Date and Time: $savedDay $savedMonth $savedYear $savedHour $savedMinute ")
 
 
-        val timeInMillis = getDateTimeCalender()
-        Log.d(TAG, "timeInMillis: $timeInMillis ")
+        val dateTimeInMillis = getDateTimeCalender()
+        Log.d(TAG, "timeInMillis: $dateTimeInMillis ")
 
 
 
@@ -196,7 +202,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
             withContext(Dispatchers.Main) {
                 insertedAlert = Alert(location = city, date = dateAndTime[0], time = dateAndTime[1])
                 alertViewModel.insertAlert(insertedAlert)
-                scheduleNotification(timeInMillis)
+                Log.d(TAG, "timeInMillis inserted: $dateTimeInMillis")
+                scheduleNotification(dateTimeInMillis)
 
             }
 
@@ -212,8 +219,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
         calendar.set(savedYear, savedMonth, savedDay, savedHour, savedMinute)
 
-        sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        Log.d(TAG, "Chosen Date and Time: ${sdf.format(calendar.time)}")
+        sdf = SimpleDateFormat("yyyy-MM-dd HH:mm a", Locale.getDefault())
 
         return calendar.timeInMillis
     }
@@ -238,21 +244,12 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
-        broadcastIntent = Intent(
-            requireActivity().applicationContext,
-            NotificationReceiver::class.java
-        )
-
-        alertId = insertedAlert?.id?.toInt()
-
         pendingIntent = PendingIntent.getBroadcast(
             requireContext(),
-            alertId!!, broadcastIntent,
+            dateTimeInMillis.toInt(), broadcastIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        alarmManager =
-            requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
             alarmManager.setExactAndAllowWhileIdle(
@@ -297,12 +294,13 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     override fun deleteAlert(alert: Alert) {
         lifecycleScope.launch {
             alertViewModel.deleteAlert(alert)
+            val timeInMillis = getDateTimeCalender().toInt()
             pendingIntent = PendingIntent.getBroadcast(
                 requireContext(),
-                alertId!!, broadcastIntent,
+                timeInMillis, broadcastIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            Log.d(TAG, "deleteAlert id: $alertId ")
+            Log.d(TAG, "deleteAlert id: $timeInMillis ")
             alarmManager.cancel(pendingIntent)
 
         }

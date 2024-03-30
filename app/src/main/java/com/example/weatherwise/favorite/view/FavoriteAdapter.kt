@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
@@ -29,6 +30,10 @@ class FavoriteAdapter(private val context: Context, private val listener: OnFavC
             listener.moveToDetails(favoriteWeather.fav_id)
         }
 
+        holder.ivDeletefavorite.setOnClickListener {
+            listener.deleteFavorite(favoriteWeather)
+        }
+
 
 
     }
@@ -40,6 +45,7 @@ class FavoriteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     val favoriteAddress: TextView = itemView.findViewById(R.id.tv_favorite_address)
     val cvFavorite : CardView = itemView.findViewById(R.id.cv_favorite)
+    val ivDeletefavorite : ImageView = itemView.findViewById(R.id.iv_delete_favorite)
 
 
 }

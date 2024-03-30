@@ -1,5 +1,6 @@
 package com.example.weatherwise.favorite.view
 
+import android.app.PendingIntent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +19,7 @@ import com.example.weatherwise.SharedLocationViewModel
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
+import com.example.weatherwise.model.FavoriteWeather
 import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.github.matteobattilana.weather.WeatherView
@@ -64,7 +66,8 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
         progressBarFavorite.visibility = View.GONE
 
         fabAddFav.setOnClickListener {
-            val action = FavoriteFragmentDirections.actionFavoriteFragmentToMapFragment2(FAVORITE_FRAGMENT)
+            val action =
+                FavoriteFragmentDirections.actionFavoriteFragmentToMapFragment2(FAVORITE_FRAGMENT)
             findNavController().navigate(action)
         }
 
@@ -96,11 +99,18 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
     override fun moveToDetails(favoriteId: Int) {
         Log.d(TAG, "id: $favoriteId ")
 
-        val action = FavoriteFragmentDirections.actionFavoriteFragmentToDetailsFavoriteFragment(favoriteId)
+        val action =
+            FavoriteFragmentDirections.actionFavoriteFragmentToDetailsFavoriteFragment(favoriteId)
         findNavController().navigate(action)
     }
-}
 
+    override fun deleteFavorite(favoriteWeather: FavoriteWeather) {
+        lifecycleScope.launch {
+            favoriteViewModel.deleteFavorite(favoriteWeather)
+
+        }
+    }
+}
 
 
 //if (!isLocationUpdated) {

@@ -79,6 +79,12 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
 
     }
 
+    fun deleteFavorite(favoriteWeather: FavoriteWeather){
+        viewModelScope.launch(Dispatchers.IO) {
+            _repo.deleteFavorite(favoriteWeather)
+        }
+    }
+
     fun getFavoriteById(favoriteId : Int){
         viewModelScope.launch {
             _repo.getFavoriteById(favoriteId).collect{
