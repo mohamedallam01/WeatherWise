@@ -41,6 +41,10 @@ class WeatherLocalDataSourceImpl(context: Context) : WeatherLocalDataSource {
 
     }
 
+    override suspend fun deleteFavorite(favoriteWeather: FavoriteWeather) {
+        weatherDao.deleteFavorite(favoriteWeather)
+    }
+
     override suspend fun insertFavorite(favoriteWeather: FavoriteWeather) {
 
 
