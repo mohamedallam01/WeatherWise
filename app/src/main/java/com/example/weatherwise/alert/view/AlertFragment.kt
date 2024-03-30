@@ -188,118 +188,38 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
-        alertViewModel.setAlertLocation("33.44", "-94.04", "en", "metric")
-        lifecycleScope.launch {
-            alertViewModel.alertWeather.collect { result ->
+        broadcastIntent = Intent(
+            requireActivity().applicationContext,
+            NotificationReceiver::class.java
+        )
 
-                when (result) {
-                    is ApiState.Loading -> {
-                        //progressBar.visibility = View.VISIBLE
-                    }
+        pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            NOTIFICATION_ID, broadcastIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
 
-                    is ApiState.Success -> {
-                        //progressBar.visibility = View.GONE
+        val alarmManager =
+            requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-                        Log.d(TAG, "Success Result: ${result.data.alerts} ")
-                        val goodWeather = "Good Weather, Enjoy"
-
-                        val desc =
-                            if (result.data.alerts.isNullOrEmpty() || result.data.alerts!![0].description == null) {
-
-                                goodWeather
-                            } else {
-
-                                result.data.alerts!![0].description
-                            }
-
-                        val currentAlert = result.data.alerts?.get(0)
-
-                        if (currentAlert != null) {
-                            alertViewModel.insertAlert(currentAlert)
-
-                        } else {
-                            val emptyAlert = Alert(
-                                senderName = "No Alerts",
-                                event = "No Events",
-                                start = 0,
-                                end = 0,
-                                description = "Good Weather Enjoy"
-                            )
-                            alertViewModel.insertAlert(emptyAlert)
-                        }
-
-
-
-
-                        withContext(Dispatchers.Main) {
-
-                            lifecycleScope.launch {
-                                alertViewModel.allAlerts.collect {
-                                    if (result.data.alerts.isNullOrEmpty()) {
-                                        alertViewModel.allAlerts.collectLatest {
-                                            alertAdapter.submitList(it)
-                                        }
-
-
-                                    } else {
-                                        alertAdapter.submitList(result.data.alerts)
-                                    }
-                                }
-
-                            }
-                            broadcastIntent = Intent(
-                                requireActivity().applicationContext,
-                                NotificationReceiver::class.java
-                            )
-                            broadcastIntent.putExtra(ALERT_DESC, desc)
-
-                            Log.d(TAG, "scheduleNotification: $desc")
-                            pendingIntent = PendingIntent.getBroadcast(
-                                requireContext(),
-                                NOTIFICATION_ID, broadcastIntent,
-                                PendingIntent.FLAG_IMMUTABLE
-                            )
-
-                            val alarmManager =
-                                requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                                alarmManager.setExactAndAllowWhileIdle(
-                                    AlarmManager.RTC_WAKEUP,
-                                    dateTimeInMillis,
-                                    pendingIntent
-                                )
-                            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                alarmManager.setExactAndAllowWhileIdle(
-                                    AlarmManager.RTC_WAKEUP,
-                                    dateTimeInMillis,
-                                    pendingIntent
-                                )
-                            } else {
-                                alarmManager.set(
-                                    AlarmManager.RTC_WAKEUP,
-                                    dateTimeInMillis,
-                                    pendingIntent
-                                )
-                            }
-
-                        }
-
-
-                    }
-
-                    is ApiState.Failure -> {
-                        //progressBar.visibility = View.GONE
-                        Log.d(TAG, "Exception is: ${result.msg}")
-                        Toast.makeText(requireActivity(), result.msg.toString(), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-
-                }
-            }
-
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
         }
 
 
@@ -324,3 +244,5 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
 
 }
+
+

@@ -7,15 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.weatherwise.R
 import com.example.weatherwise.model.DailyForecast
-import com.example.weatherwise.model.HourlyForecast
 import com.example.weatherwise.preferences.LANG_KEY
-import com.example.weatherwise.preferences.PREFS
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -37,7 +36,7 @@ class HomeDailyAdapter(private val context: Context) :
         val dailyForecast: DailyForecast = getItem(position)
 
         prefsSharedPreferences =
-            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            PreferenceManager.getDefaultSharedPreferences(context)
         tempUnitFromPrefs =
             prefsSharedPreferences.getString(TEMP_UNIT_KEY, "No saved Temp unit")
         languageFromPrefs =

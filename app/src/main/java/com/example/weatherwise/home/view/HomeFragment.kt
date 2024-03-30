@@ -16,30 +16,23 @@ import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
-import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
-import com.example.weatherwise.map.view.MAP_FRAGMENT
-import com.example.weatherwise.model.WeatherRepoImpl
 import com.example.weatherwise.model.WeatherResponse
 import com.example.weatherwise.network.ApiState
-import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.preferences.LANG_KEY
-import com.example.weatherwise.preferences.LOCATION_GPS_KEY
-import com.example.weatherwise.preferences.PREFS
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.example.weatherwise.util.GPS
 import com.example.weatherwise.util.INITIAL_CHOICE
 import com.example.weatherwise.util.INITIAL_PREFS
+import com.example.weatherwise.util.getAddress
+import com.example.weatherwise.util.round
 import com.github.matteobattilana.weather.PrecipType
 import com.github.matteobattilana.weather.WeatherView
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -47,6 +40,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -90,9 +84,9 @@ class HomeFragment : Fragment() {
     private var tempUnitFromPrefs: String? = ""
     private var languageFromPrefs: String = ""
     private var locationInitialPrefs = ""
-    private lateinit var latitudeFromPrefs: String
-    private lateinit var longitudeFromPrefs: String
-    private lateinit var tvDateTime : TextView
+    private var latitudeFromPrefs: String? = null
+    private var longitudeFromPrefs: String? = null
+    private lateinit var tvDateTime: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,8 +107,6 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
 
         Log.d(TAG, "onViewCreated: ")
         progressBar = view.findViewById(R.id.progress_Bar)
@@ -164,20 +156,69 @@ class HomeFragment : Fragment() {
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
         prefsSharedPreferences =
-            requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+
 
         initialSharedPreferences =
             requireContext().getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
 
         locationInitialPrefs =
-            initialSharedPreferences.getString(INITIAL_CHOICE, "No Location").toString()
+            initialSharedPreferences.getString(INITIAL_CHOICE, "").toString()
+
+        initDataObserver()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED){
-            homeViewModel.currentLocationSetting.collectLatest {
-               getFreshLocation()
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                homeViewModel.currentLocationSetting.collectLatest {
+                    if (it == GPS)
+                        getFreshLocation()
+                }
             }
-        }}
+        }
+    }
+
+
+    private fun initDataObserver() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                homeViewModel.currentWeather.collectLatest { result ->
+
+                    when (result) {
+                        is ApiState.Loading -> {
+                            progressBar.visibility = View.VISIBLE
+                        }
+
+                        is ApiState.Success -> {
+                            progressBar.visibility = View.GONE
+                            //Log.d(TAG, "Success Result: ${result.data.alerts} ")
+                            setHomeData(result.data)
+                            homeHourlyAdapter.submitList(result.data.hourly)
+                            homeDailyAdapter.submitList(result.data.daily)
+
+                            when (result.data.current.weather[0].main) {
+                                "Rain", "shower rain" -> weatherViewHome.setWeatherData(PrecipType.RAIN)
+                                "Snow" -> weatherViewHome.setWeatherData(PrecipType.SNOW)
+                                "Clear" -> weatherViewHome.setWeatherData(
+                                    PrecipType.CLEAR
+                                )
+                            }
+                        }
+
+                        is ApiState.Failure -> {
+                            progressBar.visibility = View.GONE
+                            Log.d(TAG, "Exception is: ${result.msg}")
+                            Toast.makeText(
+                                requireActivity(),
+                                result.msg.toString(),
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -187,63 +228,40 @@ class HomeFragment : Fragment() {
 
     }
 
-    private fun getWeatherData(){
+    private fun getWeatherData() {
 
-        Log.d(TAG, "onResume: ")
-
-        if (initialSharedPreferences.getString(INITIAL_CHOICE, "No GPS") == GPS) {
-
-            getFreshLocation()
-
-        } else if (locationInitialPrefs == LOCATION) {
-            getLocationFromMap()
-        }
-
-        Log.d(
-            TAG, "initial choice: $locationInitialPrefs"
-        )
 
         latitudeFromPrefs =
-            locationSharedPreferences.getString(LATITUDE, null).toString()
+            locationSharedPreferences.getString(LATITUDE, null)
         longitudeFromPrefs =
-            locationSharedPreferences.getString(LONGITUDE, null).toString()
+            locationSharedPreferences.getString(LONGITUDE, null)
 
-        lifecycleScope.launch {
-            homeViewModel.currentWeather.collectLatest { result ->
-
-                when (result) {
-                    is ApiState.Loading -> {
-                        progressBar.visibility = View.VISIBLE
-                    }
-
-                    is ApiState.Success -> {
-                        progressBar.visibility = View.GONE
-                        //Log.d(TAG, "Success Result: ${result.data.alerts} ")
-                        setHomeData(result.data)
-                        homeHourlyAdapter.submitList(result.data.hourly)
-                        homeDailyAdapter.submitList(result.data.daily)
-
-                        when (result.data.current.weather[0].main) {
-                            "Rain", "shower rain" -> weatherViewHome.setWeatherData(PrecipType.RAIN)
-                            "Snow" -> weatherViewHome.setWeatherData(PrecipType.SNOW)
-                            "Clear" -> weatherViewHome.setWeatherData(
-                                PrecipType.CLEAR
-                            )
-                        }
-                    }
-
-                    is ApiState.Failure -> {
-                        progressBar.visibility = View.GONE
-                        Log.d(TAG, "Exception is: ${result.msg}")
-                        Toast.makeText(requireActivity(), result.msg.toString(), Toast.LENGTH_SHORT)
-                            .show()
-                    }
+        tempUnitFromPrefs =
+            prefsSharedPreferences.getString(TEMP_UNIT_KEY, "metric")
+        languageFromPrefs =
+            prefsSharedPreferences.getString(LANG_KEY, "en").toString()
 
 
-                }
-            }
+        val tempUnit = when (tempUnitFromPrefs) {
+            KELVIN -> STANDARD
+            FAHRENHEIT -> IMPERIAL
+            else -> METRIC
 
+        }
+        Log.d(TAG, "Temp unit from prefs changed: $tempUnit ")
 
+        Log.d(
+            TAG,
+            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
+        )
+
+        if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
+            homeViewModel.setCurrentLocation(
+                latitudeFromPrefs!!,
+                longitudeFromPrefs!!,
+                languageFromPrefs,
+                tempUnit
+            )
         }
     }
 
@@ -271,46 +289,49 @@ class HomeFragment : Fragment() {
         val clouds = weatherResponse.current.clouds
 
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
-        val addresses =
-            geocoder.getFromLocation(
-                latitudeFromPrefs.toDouble(),
-                longitudeFromPrefs.toDouble(),
-                1
-            )!!
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            val address =
+                geocoder.getAddress(
+                    latitudeFromPrefs?.toDouble()?.round(4) ?: 0.0,
+                    longitudeFromPrefs?.toDouble()?.round(4) ?: 0.0
+                )!!
 
-        val address = addresses[0]
 
-        val city = address.locality
-        cvDetails.visibility = View.VISIBLE
-        tvAddress.text = city
-        val realDateTime = convertTimestampToDate(dateTime)
-        tvDateTime.text = realDateTime
-        when (tempUnitFromPrefs) {
-            KELVIN -> {
-                tvTempDegree.text = "$tempDegree °K"
-                tvWindSpeed.text = "${windSpeed}  meter/sec"
+            val city = address.locality ?: address.extras.getString("sub-admin", "Unknown area")
+            Log.d(TAG, "locality $city ")
+
+            cvDetails.visibility = View.VISIBLE
+            tvAddress.text = city
+            val realDateTime = convertTimestampToDate(dateTime)
+            tvDateTime.text = realDateTime
+            when (tempUnitFromPrefs) {
+                KELVIN -> {
+                    tvTempDegree.text = "$tempDegree °K"
+                    tvWindSpeed.text = "${windSpeed}  meter/sec"
+                }
+
+                FAHRENHEIT -> {
+                    tvTempDegree.text = "$tempDegree °F"
+                    tvWindSpeed.text = "${windSpeed}  miles/hour"
+
+                }
+
+                else -> {
+                    tvTempDegree.text = "$tempDegree °C"
+                    tvWindSpeed.text = "${windSpeed}  meter/sec"
+
+                }
+
             }
-
-            FAHRENHEIT -> {
-                tvTempDegree.text = "$tempDegree °F"
-                tvWindSpeed.text = "${windSpeed}  miles/hour"
-
-            }
-
-            else -> {
-                tvTempDegree.text = "$tempDegree °C"
-                tvWindSpeed.text = "${windSpeed}  meter/sec"
-
-            }
+            tvMain.text = main
+            val humidityUnit = getString(R.string.humidity_unit)
+            tvHumidity.text = "$humidity $humidityUnit"
+            val pressureUnit = getString(R.string.pressure_unit)
+            tvPressure.text = "$pressure $pressureUnit"
+            val cloudUnit = getString(R.string.cloud_unit)
+            tvClouds.text = "$clouds $cloudUnit"
 
         }
-        tvMain.text = main
-        val humidityUnit = getString(R.string.humidity_unit)
-        tvHumidity.text = "$humidity $humidityUnit"
-        val pressureUnit = getString(R.string.pressure_unit)
-        tvPressure.text = "$pressure $pressureUnit"
-        val cloudUnit = getString(R.string.cloud_unit)
-        tvClouds.text = "$clouds $cloudUnit"
 
 
     }
@@ -338,41 +359,7 @@ class HomeFragment : Fragment() {
                     locationSharedPreferences.edit().putString(LATITUDE, latitude).apply()
                     locationSharedPreferences.edit().putString(LONGITUDE, longitude).apply()
 
-
-                    tempUnitFromPrefs =
-                        prefsSharedPreferences.getString(TEMP_UNIT_KEY, "metric")
-                    languageFromPrefs =
-                        prefsSharedPreferences.getString(LANG_KEY, "en").toString()
-
                     getWeatherData()
-
-                    val tempUnit = when (tempUnitFromPrefs) {
-                        KELVIN -> STANDARD
-                        FAHRENHEIT -> IMPERIAL
-                        else -> METRIC
-
-                    }
-                    Log.d(TAG, "Temp unit from prefs changed: $tempUnit ")
-
-
-
-
-
-                    Log.d(
-                        TAG,
-                        "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
-                    )
-
-
-
-                    if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
-                        homeViewModel.setCurrentLocation(
-                            latitudeFromPrefs,
-                            longitudeFromPrefs,
-                            languageFromPrefs,
-                            tempUnit
-                        )
-                    }
 
                     fusedLocationProviderClient.removeLocationUpdates(this)
 
@@ -382,48 +369,6 @@ class HomeFragment : Fragment() {
 
 
         )
-    }
-
-    @SuppressLint("MissingPermission")
-    fun getLocationFromMap() {
-
-
-        val latitudeFromPrefs =
-            locationSharedPreferences.getString(LATITUDE, null)
-        val longitudeFromPrefs =
-            locationSharedPreferences.getString(LONGITUDE, null)
-
-
-
-        tempUnitFromPrefs =
-            prefsSharedPreferences.getString(TEMP_UNIT_KEY, "metric")
-        languageFromPrefs =
-            prefsSharedPreferences.getString(LANG_KEY, "en").toString()
-
-
-        val tempUnit = when (tempUnitFromPrefs) {
-            KELVIN -> STANDARD
-            FAHRENHEIT -> IMPERIAL
-            else -> METRIC
-
-        }
-        Log.d(TAG, "Temp unit from prefs changed: $tempUnit ")
-
-        Log.d(
-            TAG,
-            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
-        )
-
-        if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
-            homeViewModel.setCurrentLocation(
-                latitudeFromPrefs,
-                longitudeFromPrefs,
-                languageFromPrefs,
-                tempUnit
-            )
-        }
-
-
     }
 
     private fun convertTimestampToDate(timeStamp: Long): String {

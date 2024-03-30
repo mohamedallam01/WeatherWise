@@ -2,6 +2,7 @@ package com.example.weatherwise
 
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -30,6 +31,7 @@ import com.example.weatherwise.util.ChecksManager.enableLocationService
 import com.example.weatherwise.util.INITIAL_CHOICE
 import com.example.weatherwise.util.INITIAL_PREFS
 import com.example.weatherwise.util.InitialSetupDialog
+import com.example.weatherwise.util.setAppLocale
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 const val REQUEST_CODE = 2005

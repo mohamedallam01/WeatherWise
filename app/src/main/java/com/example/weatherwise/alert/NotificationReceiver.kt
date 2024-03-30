@@ -21,7 +21,7 @@ class NotificationReceiver : BroadcastReceiver() {
     private val TAG = "NotificationReceiver"
     private var desc: String? = ""
     override fun onReceive(context: Context, intent: Intent) {
-        desc = intent.getStringExtra(ALERT_DESC)
+
 
         //showNotification(context)
 
@@ -56,7 +56,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
     private fun showDialog(context: Context){
         val serviceIntent = Intent(context, DialogService::class.java).apply {
-            putExtra(ALERT_DESC,desc)
 
         }
         context.startService(serviceIntent)
