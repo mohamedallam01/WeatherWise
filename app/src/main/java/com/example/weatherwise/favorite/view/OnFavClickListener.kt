@@ -1,6 +1,6 @@
 package com.example.weatherwise.favorite.view
 
-import com.example.weatherwise.model.FavoriteWeather
+import com.example.weatherwise.model.entities.FavoriteWeather
 
 
 interface OnFavClickListener {

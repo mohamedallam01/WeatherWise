@@ -2,8 +2,7 @@ package com.example.weatherwise.alert.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.model.WeatherRepo
+import com.example.weatherwise.model.repo.WeatherRepo
 
 class AlertViewModelFactory (private val _repo : WeatherRepo) : ViewModelProvider.Factory{
 

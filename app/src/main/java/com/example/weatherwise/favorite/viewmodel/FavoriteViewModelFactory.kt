@@ -2,8 +2,7 @@ package com.example.weatherwise.favorite.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.weatherwise.map.viewmodel.MapViewModel
-import com.example.weatherwise.model.WeatherRepo
+import com.example.weatherwise.model.repo.WeatherRepo
 
 class FavoriteViewModelFactory (private val _repo : WeatherRepo) : ViewModelProvider.Factory{
 

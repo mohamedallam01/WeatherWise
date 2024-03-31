@@ -48,4 +48,18 @@
     <string name="tap_to_choose_a_specific_location_from_the_map">انقر لاختيار موقع محدد من الخريطة</string>
     <string name="enable_to_get_location_automatically_using_gps">تمكين الحصول على الموقع تلقائيًا باستخدام نظام تحديد المواقع</string>
     <string name="location_preferences">تفضيلات الموقع</string>
+
+    <string name="humidity_icon">أيقونة الرطوبة</string>
+    <string name="wind_speed_icon">أيقونة سرعة الرياح</string>
+    <string name="pressure_icon">أيقونة الضغط</string>
+    <string name="cloud_icon">أيقونة السحب</string>
+    <string name="humidity_unit">%</string>
+    <string name="pressure_unit">هـبـا</string>
+    <string name="cloud_unit">%</string>
+    <string name="weather_wise_splash_screen">شاشة ترحيب Weather Wise</string>
+    <string name="weather_wise">الطقس الحكيم</string>
+    <string name="delete_alert">حذف التنبيه</string>
+    <string name="permission_denied">الإذن مرفوض! \n نحن بحاجة إلى إذن الموقع للحصول على موقعك</string>
+    <string name="allow_permission">السماح بالإذن</string>
+
 </resources>

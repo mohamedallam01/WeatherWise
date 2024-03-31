@@ -1,4 +1,4 @@
-package com.example.weatherwise.model
+package com.example.weatherwise.model.entities
 
 data class WeatherDetails(
     var id: Int = 0,

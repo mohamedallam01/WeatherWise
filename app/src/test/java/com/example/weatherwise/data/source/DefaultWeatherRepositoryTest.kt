@@ -1,17 +1,14 @@
 package com.example.weatherwise.data.source
 
 
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherRepoImpl
-import com.example.weatherwise.model.WeatherResponse
-import kotlinx.coroutines.Dispatchers
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.repo.WeatherRepoImpl
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test

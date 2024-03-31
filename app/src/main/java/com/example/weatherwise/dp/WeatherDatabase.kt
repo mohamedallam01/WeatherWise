@@ -5,11 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 
-@Database([WeatherResponse::class,Alert::class,FavoriteWeather::class], version = 1)
+@Database([WeatherResponse::class, Alert::class, FavoriteWeather::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class WeatherDatabase : RoomDatabase() {
 

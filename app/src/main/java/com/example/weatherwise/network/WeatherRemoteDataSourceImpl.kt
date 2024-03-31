@@ -1,8 +1,7 @@
 package com.example.weatherwise.network
 
 import android.util.Log
-import com.example.weatherwise.model.WeatherResponse
-import retrofit2.Response
+import com.example.weatherwise.model.entities.WeatherResponse
 
 class WeatherRemoteDataSourceImpl : WeatherRemoteDataSource {
 

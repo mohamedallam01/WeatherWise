@@ -2,12 +2,11 @@ package com.example.weatherwise.dp
 
 import android.util.Log
 import androidx.room.TypeConverter
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.CurrentWeather
-import com.example.weatherwise.model.DailyForecast
-import com.example.weatherwise.model.HourlyForecast
-import com.example.weatherwise.model.MinutelyForecast
-import com.example.weatherwise.model.WeatherDetails
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.CurrentWeather
+import com.example.weatherwise.model.entities.DailyForecast
+import com.example.weatherwise.model.entities.HourlyForecast
+import com.example.weatherwise.model.entities.WeatherDetails
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
@@ -20,13 +19,13 @@ object Converters {
     }
 
     @TypeConverter
-    fun toCurrentWeather(json : String): CurrentWeather{
+    fun toCurrentWeather(json : String): CurrentWeather {
         val objectType  = object :TypeToken<CurrentWeather>() {}.type
         return Gson().fromJson(json,objectType)
     }
 
     @TypeConverter
-    fun toWeatherDetails(json : String) : WeatherDetails{
+    fun toWeatherDetails(json : String) : WeatherDetails {
         val listType = object :TypeToken<List<WeatherDetails>>() {}.type
         return Gson().fromJson(json,listType)
     }

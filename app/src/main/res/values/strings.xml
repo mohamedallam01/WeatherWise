@@ -58,4 +58,6 @@
     <string name="weather_wise_splash_screen">Weather Wise Splash Screen</string>
     <string name="weather_wise">WeatherWise</string>
     <string name="delete_alert">Delete Alert</string>
+    <string name="permission_denied">Permission Denied! \n We need Location Permission to get your location</string>
+    <string name="allow_permission">Allow Permission</string>
 </resources>

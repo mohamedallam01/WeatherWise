@@ -7,13 +7,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.example.weatherwise.dp.WeatherDao
 import com.example.weatherwise.dp.WeatherDatabase
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherResponse
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.`is`
@@ -126,6 +123,45 @@ class WeatherDaoTest {
                 assertThat(result2, not(CoreMatchers.nullValue()))
                 assertThat(result2, `is`(1))
                 assertThat(result2, `is`(favorite))
+            }
+        }
+        job.cancel()
+    }
+
+
+    @Test
+    fun deleteAlert_alert_alertDeletedSuccessfully() = runTest {
+        // Given
+        val alert = Alert(id = 1)
+        dao.insertAlert(alert)
+
+        // When
+        dao.deleteAlert(alert)
+
+        // Then
+        val result = dao.getAlerts()
+        val job = launch {
+            result.collect {
+                assertThat(it.isEmpty(), `is`(true))
+            }
+        }
+        job.cancel()
+    }
+
+    @Test
+    fun deleteFavorite_favorite_favoriteDeletedSuccessfully() = runTest {
+        // Given
+        val favorite = FavoriteWeather(fav_id = 1)
+        dao.insertFavorite(favorite)
+
+        // When
+        dao.deleteFavorite(favorite)
+
+        // Then
+        val result = dao.getAllFavorites()
+        val job = launch {
+            result.collect {
+                assertThat(it.isEmpty(), `is`(true))
             }
         }
         job.cancel()

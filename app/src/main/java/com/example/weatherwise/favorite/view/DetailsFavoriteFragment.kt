@@ -20,13 +20,12 @@ import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
 import com.example.weatherwise.home.view.HomeDailyAdapter
 import com.example.weatherwise.home.view.HomeHourlyAdapter
-import com.example.weatherwise.model.WeatherRepoImpl
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.repo.WeatherRepoImpl
+import com.example.weatherwise.model.entities.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.github.matteobattilana.weather.PrecipType
 import com.github.matteobattilana.weather.WeatherView
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

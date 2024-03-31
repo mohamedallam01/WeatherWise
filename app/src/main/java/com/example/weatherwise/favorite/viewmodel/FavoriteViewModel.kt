@@ -1,21 +1,16 @@
 package com.example.weatherwise.favorite.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherRepo
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.repo.WeatherRepo
 import com.example.weatherwise.network.ApiState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -28,7 +23,9 @@ class FavoriteViewModel (private val _repo: WeatherRepo) : ViewModel() {
     )
     val favoriteWeather = _favoriteWeather.asStateFlow()
 
-    private val _favoriteWeatherById: MutableStateFlow<FavoriteWeather> = MutableStateFlow(FavoriteWeather())
+    private val _favoriteWeatherById: MutableStateFlow<FavoriteWeather> = MutableStateFlow(
+        FavoriteWeather()
+    )
     val favoriteWeatherById = _favoriteWeatherById.asStateFlow()
 
 

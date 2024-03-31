@@ -8,16 +8,14 @@ import com.example.weatherwise.dp.WeatherDao
 import com.example.weatherwise.dp.WeatherDatabase
 import com.example.weatherwise.dp.WeatherLocalDataSource
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -117,5 +115,46 @@ class WeatherLocalDataSourceTest {
 
         job.cancel()
 
+    }
+
+
+    @Test
+    fun deleteAlert_alert_alertDeletedSuccessfully() = runTest {
+        // Given
+        val alert = Alert(1)
+        dao.insertAlert(alert)
+
+        // When
+        localDataSource.deleteAlert(alert)
+
+        // Then
+        val result = localDataSource.getAllAlerts()
+        val job = launch {
+            result.collect {
+                assertThat(it.isEmpty(), not(true))
+                assertThat(it.contains(alert), not(true))
+            }
+        }
+        job.cancel()
+    }
+
+    @Test
+    fun deleteFavorite_favorite_favoriteDeletedSuccessfully() = runTest {
+        // Given
+        val favorite = FavoriteWeather(1)
+        dao.insertFavorite(favorite)
+
+        // When
+        localDataSource.deleteFavorite(favorite)
+
+        // Then
+        val result = localDataSource.getAllFavorites()
+        val job = launch {
+            result.collect {
+                assertThat(it.isEmpty(), not(true))
+                assertThat(it.contains(favorite), not(true))
+            }
+        }
+        job.cancel()
     }
 }

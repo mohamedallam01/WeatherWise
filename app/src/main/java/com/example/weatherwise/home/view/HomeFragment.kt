@@ -23,8 +23,9 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
+import com.example.weatherwise.databinding.FragmentHomeBinding
 import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.WeatherResponse
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.preferences.LANG_KEY
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
@@ -64,30 +65,18 @@ class HomeFragment : Fragment() {
 
     private val homeViewModel: HomeViewModel by activityViewModels()
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var progressBar: ProgressBar
-    private lateinit var tvAddress: TextView
-    private lateinit var tvTempDegree: TextView
-    private lateinit var tvMain: TextView
-    private lateinit var tvHumidity: TextView
-    private lateinit var tvWindSpeed: TextView
-    private lateinit var tvPressure: TextView
-    private lateinit var tvClouds: TextView
-    private lateinit var cvDetails: CardView
     private lateinit var homeHourlyAdapter: HomeHourlyAdapter
-    private lateinit var rvHourly: RecyclerView
-    private lateinit var rvDaily: RecyclerView
     private lateinit var homeDailyAdapter: HomeDailyAdapter
     private lateinit var locationSharedPreferences: SharedPreferences
     private lateinit var prefsSharedPreferences: SharedPreferences
     private lateinit var initialSharedPreferences: SharedPreferences
-    private lateinit var weatherViewHome: WeatherView
     private var tempUnitFromPrefs: String? = ""
     private var languageFromPrefs: String = ""
     private var locationInitialPrefs = ""
     private var latitudeFromPrefs: String? = null
     private var longitudeFromPrefs: String? = null
-    private lateinit var tvDateTime: TextView
 
+    private lateinit var binding: FragmentHomeBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -99,41 +88,27 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-
-        Log.d(TAG, "onCreateView: ")
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         Log.d(TAG, "onViewCreated: ")
-        progressBar = view.findViewById(R.id.progress_Bar)
-        tvAddress = view.findViewById(R.id.tv_address)
-        tvTempDegree = view.findViewById(R.id.tv_temp_degree)
-        tvMain = view.findViewById(R.id.tv_main)
-        rvHourly = view.findViewById(R.id.rv_hourly)
-        rvDaily = view.findViewById(R.id.rv_daily)
-        tvHumidity = view.findViewById(R.id.tv_humidity_desc)
-        tvWindSpeed = view.findViewById(R.id.tv_wind_speed_desc)
-        tvPressure = view.findViewById(R.id.tv_pressure_desc)
-        tvClouds = view.findViewById(R.id.tv_clouds_desc)
-        cvDetails = view.findViewById(R.id.cv_details)
-        weatherViewHome = view.findViewById(R.id.weather_view_home)
-        cvDetails.visibility = View.GONE
-        tvDateTime = view.findViewById(R.id.tv_date_time)
+        binding.cvDetails.visibility = View.GONE
+        binding.cvCurrentWeather.visibility = View.GONE
 
 
 
         homeHourlyAdapter = HomeHourlyAdapter(requireContext())
-        rvHourly.adapter = homeHourlyAdapter
-        rvHourly.layoutManager =
+        binding.rvHourly.adapter = homeHourlyAdapter
+        binding.rvHourly.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         homeDailyAdapter = HomeDailyAdapter(requireContext())
-        rvDaily.adapter = homeDailyAdapter
-        rvDaily.layoutManager =
+        binding.rvDaily.adapter = homeDailyAdapter
+        binding.rvDaily.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
 
@@ -185,27 +160,27 @@ class HomeFragment : Fragment() {
 
                     when (result) {
                         is ApiState.Loading -> {
-                            progressBar.visibility = View.VISIBLE
+                            binding.progressBar.visibility = View.VISIBLE
                         }
 
                         is ApiState.Success -> {
-                            progressBar.visibility = View.GONE
+                            binding.progressBar.visibility = View.GONE
                             //Log.d(TAG, "Success Result: ${result.data.alerts} ")
                             setHomeData(result.data)
                             homeHourlyAdapter.submitList(result.data.hourly)
                             homeDailyAdapter.submitList(result.data.daily)
 
                             when (result.data.current.weather[0].main) {
-                                "Rain", "shower rain" -> weatherViewHome.setWeatherData(PrecipType.RAIN)
-                                "Snow" -> weatherViewHome.setWeatherData(PrecipType.SNOW)
-                                "Clear" -> weatherViewHome.setWeatherData(
+                                "Rain", "shower rain" -> binding.weatherViewHome.setWeatherData(PrecipType.RAIN)
+                                "Snow" -> binding.weatherViewHome.setWeatherData(PrecipType.SNOW)
+                                "Clear" -> binding.weatherViewHome.setWeatherData(
                                     PrecipType.CLEAR
                                 )
                             }
                         }
 
                         is ApiState.Failure -> {
-                            progressBar.visibility = View.GONE
+                            binding.progressBar.visibility = View.GONE
                             Log.d(TAG, "Exception is: ${result.msg}")
                             Toast.makeText(
                                 requireActivity(),
@@ -300,36 +275,37 @@ class HomeFragment : Fragment() {
             val city = address.locality ?: address.extras.getString("sub-admin", "Unknown area")
             Log.d(TAG, "locality $city ")
 
-            cvDetails.visibility = View.VISIBLE
-            tvAddress.text = city
+            binding.cvDetails.visibility = View.VISIBLE
+            binding.cvCurrentWeather.visibility = View.VISIBLE
+            binding.tvAddress.text = city
             val realDateTime = convertTimestampToDate(dateTime)
-            tvDateTime.text = realDateTime
+            binding.tvDateTime.text = realDateTime
             when (tempUnitFromPrefs) {
                 KELVIN -> {
-                    tvTempDegree.text = "$tempDegree °K"
-                    tvWindSpeed.text = "${windSpeed}  meter/sec"
+                    binding.tvTempDegree.text = "$tempDegree °K"
+                    binding.tvWindSpeedDesc.text = "${windSpeed}  meter/sec"
                 }
 
                 FAHRENHEIT -> {
-                    tvTempDegree.text = "$tempDegree °F"
-                    tvWindSpeed.text = "${windSpeed}  miles/hour"
+                    binding.tvTempDegree.text = "$tempDegree °F"
+                    binding.tvWindSpeedDesc.text = "${windSpeed}  miles/hour"
 
                 }
 
                 else -> {
-                    tvTempDegree.text = "$tempDegree °C"
-                    tvWindSpeed.text = "${windSpeed}  meter/sec"
+                    binding.tvTempDegree.text = "$tempDegree °C"
+                    binding.tvWindSpeedDesc.text = "${windSpeed}  meter/sec"
 
                 }
 
             }
-            tvMain.text = main
+            binding.tvMain.text = main
             val humidityUnit = getString(R.string.humidity_unit)
-            tvHumidity.text = "$humidity $humidityUnit"
+            binding.tvHumidityDesc.text = "$humidity $humidityUnit"
             val pressureUnit = getString(R.string.pressure_unit)
-            tvPressure.text = "$pressure $pressureUnit"
+            binding.tvPressureDesc.text = "$pressure $pressureUnit"
             val cloudUnit = getString(R.string.cloud_unit)
-            tvClouds.text = "$clouds $cloudUnit"
+            binding.tvCloudsDesc.text = "$clouds $cloudUnit"
 
         }
 
@@ -379,27 +355,6 @@ class HomeFragment : Fragment() {
 
 
 }
-
-//    private fun getFavoriteLocation() {
-//
-//        val latitudeFromPrefs = sharedPreferences.getString(LATITUDE, "")
-//        val longitudeFromPrefs = sharedPreferences.getString(LONGITUDE, "")
-//
-////        Log.d(
-////            TAG,
-////            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
-////        )
-//
-//        if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
-//            homeViewModel.setCurrentLocation(
-//                latitudeFromPrefs,
-//                longitudeFromPrefs,
-//                "en",
-//                "metric"
-//            )
-//        }
-//
-//    }
 
 
 
