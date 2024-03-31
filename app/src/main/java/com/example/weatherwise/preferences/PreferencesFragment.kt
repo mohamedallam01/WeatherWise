@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.Display.Mode
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -21,6 +22,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.example.weatherwise.R
+import com.example.weatherwise.util.ChecksManager
 import java.util.Locale
 
 
@@ -36,20 +38,36 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
-            (activity as? AppCompatActivity)?.findViewById<ViewGroup>(android.R.id.content)
-                ?.getChildAt(0)
+        (activity as? AppCompatActivity)?.findViewById<ViewGroup>(android.R.id.content)
+            ?.getChildAt(0)
         findPreference<Preference>("language")?.setOnPreferenceChangeListener { preference, newValue ->
             updateLocale(newValue.toString())
             true
         }
 
         val locationMapPreference: Preference? = findPreference("location_map")
-        locationMapPreference?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val action = PreferencesFragmentDirections.actionPreferencesFragmentToMapFragment(
-                PREFERENCES_FRAGMENT)
-            findNavController().navigate(action)
-            true
-        }
+            locationMapPreference?.onPreferenceClickListener =
+                Preference.OnPreferenceClickListener {
+
+                    if (ChecksManager.checkConnection(requireContext())) {
+                        val action =
+                            PreferencesFragmentDirections.actionPreferencesFragmentToMapFragment(
+                                PREFERENCES_FRAGMENT
+                            )
+                        findNavController().navigate(action)
+
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "Check Your Internet Connection",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
+
+                    true
+                }
+
 
 
     }

@@ -20,6 +20,7 @@ import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
 import com.example.weatherwise.model.entities.FavoriteWeather
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.util.ChecksManager
 import kotlinx.coroutines.launch
 
 
@@ -53,11 +54,25 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
 
 
         binding.progressBarFavorite.visibility = View.GONE
-        binding.fabAddFav.setOnClickListener {
-            val action =
-                FavoriteFragmentDirections.actionFavoriteFragmentToMapFragment2(FAVORITE_FRAGMENT)
-            findNavController().navigate(action)
-        }
+
+
+            binding.fabAddFav.setOnClickListener {
+                if (ChecksManager.checkConnection(requireContext())) {
+                    val action =
+                        FavoriteFragmentDirections.actionFavoriteFragmentToMapFragment2(
+                            FAVORITE_FRAGMENT
+                        )
+                    findNavController().navigate(action)
+                }
+
+                else {
+                    Toast.makeText(requireContext(), "Check Your Internet Connection", Toast.LENGTH_SHORT)
+                        .show()
+
+                }
+            }
+
+
 
         favoriteAdapter = FavoriteAdapter(requireContext(), this)
         binding.rvFavorites.adapter = favoriteAdapter

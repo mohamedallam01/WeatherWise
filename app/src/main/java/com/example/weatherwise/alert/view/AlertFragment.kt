@@ -216,33 +216,41 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     private fun pickDate() {
         binding.fabAddAlert.setOnClickListener {
 
-            showNotificationAlarmDialog { alertType ->
-                if (alertType == "Alarm") {
-                    if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
-                        year = calender.get(Calendar.YEAR)
-                        month = calender.get(Calendar.MONTH)
-                        day = calender.get(Calendar.DAY_OF_MONTH)
-                        DatePickerDialog(requireContext(), this, year, month, day).show()
+            if(ChecksManager.checkConnection(requireContext())){
+                showNotificationAlarmDialog { alertType ->
+                    if (alertType == "Alarm") {
+                        if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
+                            year = calender.get(Calendar.YEAR)
+                            month = calender.get(Calendar.MONTH)
+                            day = calender.get(Calendar.DAY_OF_MONTH)
+                            DatePickerDialog(requireContext(), this, year, month, day).show()
 
 
-                    } else {
-                        ChecksManager.requestDrawOverlayPermission(requireActivity())
+                        } else {
+                            ChecksManager.requestDrawOverlayPermission(requireActivity())
+                        }
+                    } else if (alertType == "Notification") {
+
+                        if (ChecksManager.notificationPermission(requireActivity())) {
+                            year = calender.get(Calendar.YEAR)
+                            month = calender.get(Calendar.MONTH)
+                            day = calender.get(Calendar.DAY_OF_MONTH)
+                            DatePickerDialog(requireContext(), this, year, month, day).show()
+
+
+                        } else {
+                            ChecksManager.requestNotificationPermission(requireActivity())
+                        }
                     }
-                } else if (alertType == "Notification") {
 
-                    if (ChecksManager.notificationPermission(requireActivity())) {
-                        year = calender.get(Calendar.YEAR)
-                        month = calender.get(Calendar.MONTH)
-                        day = calender.get(Calendar.DAY_OF_MONTH)
-                        DatePickerDialog(requireContext(), this, year, month, day).show()
-
-
-                    } else {
-                        ChecksManager.requestNotificationPermission(requireActivity())
-                    }
                 }
-
             }
+
+            else{
+                Toast.makeText(requireContext(),"Check Your Internet Connection",  Toast.LENGTH_SHORT).show()
+            }
+
+
 
 
         }

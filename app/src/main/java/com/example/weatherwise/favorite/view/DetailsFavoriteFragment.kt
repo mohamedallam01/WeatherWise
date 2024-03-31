@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
+import com.example.weatherwise.databinding.FragmentDetailsFavoriteBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModelFactory
@@ -34,20 +35,9 @@ class DetailsFavoriteFragment : Fragment() {
     private val TAG = "DetailsFavoriteFragment"
     private lateinit var favoriteViewModel: FavoriteViewModel
     private lateinit var favoriteViewModelFactory: FavoriteViewModelFactory
-    private lateinit var progressBar: ProgressBar
-    private lateinit var tvAddress: TextView
-    private lateinit var tvTempDegree: TextView
-    private lateinit var tvMain: TextView
-    private lateinit var tvHumidity: TextView
-    private lateinit var tvWindSpeed: TextView
-    private lateinit var tvPressure: TextView
-    private lateinit var tvClouds: TextView
-    private lateinit var cvDetails: CardView
     private lateinit var homeHourlyAdapter: HomeHourlyAdapter
-    private lateinit var rvHourly: RecyclerView
-    private lateinit var rvDaily: RecyclerView
     private lateinit var homeDailyAdapter: HomeDailyAdapter
-    private lateinit var weatherViewFavDetails : WeatherView
+    private lateinit var binding: FragmentDetailsFavoriteBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,8 +59,8 @@ class DetailsFavoriteFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_details_favorite, container, false)
+        binding = FragmentDetailsFavoriteBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,29 +72,15 @@ class DetailsFavoriteFragment : Fragment() {
 
         val favoriteId = args.id
 
-        progressBar = view.findViewById(R.id.progress_Bar)
-        tvAddress = view.findViewById(R.id.tv_address)
-        tvTempDegree = view.findViewById(R.id.tv_temp_degree)
-        tvMain = view.findViewById(R.id.tv_main)
-        rvHourly = view.findViewById(R.id.rv_hourly)
-        rvDaily = view.findViewById(R.id.rv_daily)
-        tvHumidity = view.findViewById(R.id.tv_humidity_desc)
-        tvWindSpeed = view.findViewById(R.id.tv_wind_speed_desc)
-        tvPressure = view.findViewById(R.id.tv_pressure_desc)
-        tvClouds = view.findViewById(R.id.tv_clouds_desc)
-        cvDetails = view.findViewById(R.id.cv_details)
-        cvDetails.visibility = View.GONE
-        weatherViewFavDetails = view.findViewById(R.id.weather_view_favorite_details)
-
 
         homeHourlyAdapter = HomeHourlyAdapter(requireContext())
-        rvHourly.adapter = homeHourlyAdapter
-        rvHourly.layoutManager =
+        binding.rvHourly.adapter = homeHourlyAdapter
+        binding.rvHourly.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         homeDailyAdapter = HomeDailyAdapter(requireContext())
-        rvDaily.adapter = homeDailyAdapter
-        rvDaily.layoutManager =
+        binding.rvDaily.adapter = homeDailyAdapter
+        binding.rvDaily.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         favoriteViewModel.getFavoriteById(favoriteId)
@@ -112,10 +88,10 @@ class DetailsFavoriteFragment : Fragment() {
         lifecycleScope.launch {
             var latitude = ""
             var longitude = ""
-            favoriteViewModel.favoriteWeatherById.collect{favoriteWeatherDetails ->
+            favoriteViewModel.favoriteWeatherById.collect { favoriteWeatherDetails ->
                 latitude = favoriteWeatherDetails.lat.toString()
                 longitude = favoriteWeatherDetails.lon.toString()
-                favoriteViewModel.setFavDetailsLocation(latitude,longitude,"en","metric")
+                favoriteViewModel.setFavDetailsLocation(latitude, longitude, "en", "metric")
 
             }
         }
@@ -126,27 +102,27 @@ class DetailsFavoriteFragment : Fragment() {
 
                 when (result) {
                     is ApiState.Loading -> {
-                        progressBar.visibility = View.VISIBLE
+                        binding.progressBar.visibility = View.VISIBLE
                     }
 
                     is ApiState.Success -> {
-                        progressBar.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Log.d(TAG, "Success Result: ${result.data} ")
                         setHomeData(result.data)
                         homeHourlyAdapter.submitList(result.data.hourly)
                         homeDailyAdapter.submitList(result.data.daily)
 
                         when (result.data.current.weather[0].main) {
-                            "Rain" -> weatherViewFavDetails.setWeatherData(PrecipType.RAIN)
-                            "Snow" -> weatherViewFavDetails.setWeatherData(PrecipType.SNOW)
-                            "Clear" -> weatherViewFavDetails.setWeatherData(
+                            "Rain" -> binding.weatherViewFavDetails.setWeatherData(PrecipType.RAIN)
+                            "Snow" -> binding.weatherViewFavDetails.setWeatherData(PrecipType.SNOW)
+                            "Clear" -> binding.weatherViewFavDetails.setWeatherData(
                                 PrecipType.CLEAR
                             )
                         }
                     }
 
                     is ApiState.Failure -> {
-                        progressBar.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Log.d(TAG, "Exception is: ${result.msg}")
                         Toast.makeText(requireActivity(), result.msg.toString(), Toast.LENGTH_SHORT)
                             .show()
@@ -158,7 +134,6 @@ class DetailsFavoriteFragment : Fragment() {
 
 
         }
-
 
 
     }
@@ -173,14 +148,14 @@ class DetailsFavoriteFragment : Fragment() {
         val pressure = weatherResponse.current.pressure
         val clouds = weatherResponse.current.clouds
 
-        cvDetails.visibility = View.VISIBLE
-        tvAddress.text = address
-        tvTempDegree.text = "$tempDegree °C"
-        tvMain.text = main
-        tvHumidity.text = humidity.toString()
-        tvWindSpeed.text = windSpeed.toString()
-        tvPressure.text = pressure.toString()
-        tvClouds.text = clouds.toString()
+        binding.cvDetails.visibility = View.VISIBLE
+        binding.tvAddress.text = address
+        binding.tvTempDegree.text = "$tempDegree °C"
+        binding.tvMain.text = main
+        binding.tvHumidityDesc.text = humidity.toString()
+        binding.tvWindSpeedDesc.text = windSpeed.toString()
+        binding.tvPressureDesc.text = pressure.toString()
+        binding.tvCloudsDesc.text = clouds.toString()
 
 
     }

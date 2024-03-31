@@ -17,6 +17,7 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
@@ -24,11 +25,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
 import com.example.weatherwise.databinding.FragmentHomeBinding
+import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
+import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.entities.WeatherResponse
+import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
+import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.preferences.LANG_KEY
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
+import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.GPS
 import com.example.weatherwise.util.INITIAL_CHOICE
 import com.example.weatherwise.util.INITIAL_PREFS
@@ -63,7 +69,6 @@ class HomeFragment : Fragment() {
 
     private val TAG = "HomeFragment"
 
-    private val homeViewModel: HomeViewModel by activityViewModels()
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var homeHourlyAdapter: HomeHourlyAdapter
     private lateinit var homeDailyAdapter: HomeDailyAdapter
@@ -75,7 +80,8 @@ class HomeFragment : Fragment() {
     private var locationInitialPrefs = ""
     private var latitudeFromPrefs: String? = null
     private var longitudeFromPrefs: String? = null
-
+    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var binding: FragmentHomeBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,6 +132,15 @@ class HomeFragment : Fragment() {
 //                }
 //            }
 
+        homeViewModelFactory = HomeViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(requireContext())
+            )
+        )
+
+        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
+
 
         locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
@@ -154,46 +169,78 @@ class HomeFragment : Fragment() {
 
 
     private fun initDataObserver() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                homeViewModel.currentWeather.collectLatest { result ->
 
-                    when (result) {
-                        is ApiState.Loading -> {
-                            binding.progressBar.visibility = View.VISIBLE
-                        }
+        if (ChecksManager.checkConnection(requireContext())) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    homeViewModel.currentWeather.collectLatest { result ->
 
-                        is ApiState.Success -> {
-                            binding.progressBar.visibility = View.GONE
-                            //Log.d(TAG, "Success Result: ${result.data.alerts} ")
-                            setHomeData(result.data)
-                            homeHourlyAdapter.submitList(result.data.hourly)
-                            homeDailyAdapter.submitList(result.data.daily)
+                        when (result) {
+                            is ApiState.Loading -> {
+                                binding.progressBar.visibility = View.VISIBLE
+                            }
 
-                            when (result.data.current.weather[0].main) {
-                                "Rain", "shower rain" -> binding.weatherViewHome.setWeatherData(PrecipType.RAIN)
-                                "Snow" -> binding.weatherViewHome.setWeatherData(PrecipType.SNOW)
-                                "Clear" -> binding.weatherViewHome.setWeatherData(
-                                    PrecipType.CLEAR
+                            is ApiState.Success -> {
+                                binding.progressBar.visibility = View.GONE
+                                //Log.d(TAG, "Success Result: ${result.data.alerts} ")
+                                setHomeData(result.data)
+                                homeHourlyAdapter.submitList(result.data.hourly)
+                                homeDailyAdapter.submitList(result.data.daily)
+
+                                when (result.data.current.weather[0].main) {
+                                    "Rain", "shower rain" -> binding.weatherViewHome.setWeatherData(
+                                        PrecipType.RAIN
+                                    )
+
+                                    "Snow" -> binding.weatherViewHome.setWeatherData(PrecipType.SNOW)
+                                    "Clear" -> binding.weatherViewHome.setWeatherData(
+                                        PrecipType.CLEAR
+                                    )
+                                }
+                            }
+
+                            is ApiState.Failure -> {
+                                binding.progressBar.visibility = View.GONE
+                                Log.d(TAG, "Exception is: ${result.msg}")
+                                Toast.makeText(
+                                    requireActivity(),
+                                    result.msg.toString(),
+                                    Toast.LENGTH_SHORT
                                 )
+                                    .show()
                             }
                         }
 
-                        is ApiState.Failure -> {
-                            binding.progressBar.visibility = View.GONE
-                            Log.d(TAG, "Exception is: ${result.msg}")
-                            Toast.makeText(
-                                requireActivity(),
-                                result.msg.toString(),
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
                     }
-
                 }
             }
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    homeViewModel.currentWeatherFromDatabase.collectLatest { result ->
+                        binding.progressBar.visibility = View.GONE
+                        //Log.d(TAG, "Success Result: ${result.data.alerts} ")
+                        setHomeData(result)
+                        homeHourlyAdapter.submitList(result.hourly)
+                        homeDailyAdapter.submitList(result.daily)
+
+                        when (result.current.weather[0].main) {
+                            "Rain", "shower rain" -> binding.weatherViewHome.setWeatherData(
+                                PrecipType.RAIN
+                            )
+
+                            "Snow" -> binding.weatherViewHome.setWeatherData(PrecipType.SNOW)
+                            "Clear" -> binding.weatherViewHome.setWeatherData(
+                                PrecipType.CLEAR
+                            )
+                        }
+
+                    }
+                }
+
+            }
         }
+
     }
 
     override fun onResume() {
