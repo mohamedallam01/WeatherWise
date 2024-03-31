@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="temp_unit_entries">
+        <item>Kelvin</item>
+        <item>Celsius</item>
+        <item>Fahrenheit</item>
+    </string-array>
+    <string-array name="temp_unit_values">
+        <item>kelvin</item>
+        <item>celsius</item>
+        <item>fahrenheit</item>
+    </string-array>
+
+    <string-array name="wind_unit_entries">
+        <item>Meters per second</item>
+        <item>Miles per hour</item>
+    </string-array>
+    <string-array name="wind_unit_values">
+        <item>meters_per_second</item>
+        <item>miles_per_hour</item>
+    </string-array>
+
+    <string-array name="language_entries">
+        <item>Arabic</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="language_values">
+        <item>ar</item>
+        <item>en</item>
+    </string-array>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+</resources>

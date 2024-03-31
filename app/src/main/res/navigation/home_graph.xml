@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.weatherwise.home.view.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_mapFragment3"
+            app:destination="@id/mapFragment3" />
+        <argument
+            android:name="map_fragemnt"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapFragment3"
+        android:name="com.example.weatherwise.map.view.MapFragment"
+        android:label="fragment_map"
+        tools:layout="@layout/fragment_map" >
+        <argument
+            android:name="originFragment"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_mapFragment3_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+</navigation>
