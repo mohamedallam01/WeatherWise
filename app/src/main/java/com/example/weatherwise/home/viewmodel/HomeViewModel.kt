@@ -1,20 +1,16 @@
 package com.example.weatherwise.home.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherwise.model.WeatherRepo
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.WeatherResponse
+import com.example.weatherwise.model.repo.WeatherRepo
 import com.example.weatherwise.network.ApiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
@@ -24,20 +20,29 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
     private val _currentWeather: MutableStateFlow<ApiState> = MutableStateFlow(ApiState.Loading)
     val currentWeather = _currentWeather.asStateFlow()
 
-    private val _currentLocationSetting : MutableStateFlow<String?> = MutableStateFlow(null)
+    private val _currentLocationSetting: MutableStateFlow<String?> = MutableStateFlow(null)
     val currentLocationSetting = _currentLocationSetting.asStateFlow()
 
+    private val _currentWeatherFromDatabase: MutableStateFlow<WeatherResponse> = MutableStateFlow(
+        WeatherResponse()
+    )
+    val currentWeatherFromDatabase = _currentWeatherFromDatabase.asStateFlow()
 
-    fun setCurrentSettings(setting : String){
+
+    init {
+        getCurrentWeatherFromDataBase()
+    }
+
+    fun setCurrentSettings(setting: String) {
         _currentLocationSetting.value = setting
     }
 
     fun setCurrentLocation(lat: String, lon: String, language: String, units: String) {
-        getCurrentWeatherFromDatabase(lat, lon, language, units)
+        getCurrentWeatherFromRemote(lat, lon, language, units)
     }
 
 
-    private fun getCurrentWeatherFromDatabase(
+    private fun getCurrentWeatherFromRemote(
         lat: String,
         lon: String,
         language: String,
@@ -61,5 +66,16 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
 
 
     }
+
+
+    private fun getCurrentWeatherFromDataBase() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _repo.getWeatherResponse().collectLatest { weatherResponse ->
+                _currentWeatherFromDatabase.value = weatherResponse
+                Log.d(TAG, "getCurrentWeather from database: $weatherResponse")
+            }
+        }
+    }
+
 
 }

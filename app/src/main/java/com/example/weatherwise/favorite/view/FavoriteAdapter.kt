@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
-import com.example.weatherwise.model.FavoriteWeather
+import com.example.weatherwise.model.entities.FavoriteWeather
 
 class FavoriteAdapter(private val context: Context, private val listener: OnFavClickListener) :
     ListAdapter<FavoriteWeather, FavoriteViewHolder>(FavoriteDiffUtil()) {

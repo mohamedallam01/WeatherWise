@@ -1,10 +1,10 @@
 package com.example.weatherwise.data.source
 
 import androidx.lifecycle.MutableLiveData
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherRepo
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.repo.WeatherRepo
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 class FakeWeatherRepository : WeatherRepo {
@@ -27,7 +27,7 @@ class FakeWeatherRepository : WeatherRepo {
     }
 
     override fun getAllAlerts(): Flow<List<Alert>> {
-        TODO("Not yet implemented")
+        return localDataSource.getAllAlerts()
     }
 
     override fun getAllFavorites(): Flow<List<FavoriteWeather>> {
@@ -42,9 +42,14 @@ class FakeWeatherRepository : WeatherRepo {
         localDataSource.insertFavorite(favoriteWeather)
     }
 
-    override suspend fun deleteAlert(alert: Alert) {
-        TODO("Not yet implemented")
+    override suspend fun deleteAlert(alert: Alert?) {
+        localDataSource.deleteAlert(alert)
     }
+
+    override suspend fun deleteFavorite(favoriteWeather: FavoriteWeather) {
+        localDataSource.deleteFavorite(favoriteWeather)
+    }
+
 
     override fun getFavoriteById(favoriteId: Int): Flow<FavoriteWeather> {
         TODO("Not yet implemented")

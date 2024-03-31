@@ -1,9 +1,9 @@
 package com.example.weatherwise.data.source
 
 import com.example.weatherwise.dp.WeatherLocalDataSource
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -43,7 +43,12 @@ class FakeLocalDataSource() : WeatherLocalDataSource {
         return favoritesFlowById
     }
 
-    override suspend fun deleteAlert(alert: Alert) {
-        TODO("Not yet implemented")
+    override suspend fun deleteAlert(alert: Alert?) {
+        alerts.remove(alert)
     }
+
+    override suspend fun deleteFavorite(favoriteWeather: FavoriteWeather) {
+        favorites.remove(favoriteWeather)
+    }
+
 }

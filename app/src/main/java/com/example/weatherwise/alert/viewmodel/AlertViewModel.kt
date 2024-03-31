@@ -1,16 +1,12 @@
 package com.example.weatherwise.alert.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.WeatherRepo
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.repo.WeatherRepo
 import com.example.weatherwise.network.ApiState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -72,9 +72,6 @@ object ChecksManager {
         return result
     }
 
-
-
-
     fun isDrawOverlayPermissionGranted(activity: Activity): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(activity)
     }
@@ -94,4 +91,13 @@ object ChecksManager {
                 resultCode == Activity.RESULT_OK &&
                 isDrawOverlayPermissionGranted(activity)
     }
+
+    fun requestNotificationPermission(context: Context) {
+        val intent = Intent()
+        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        val uri: Uri = Uri.fromParts("package", context.packageName, null)
+        intent.data = uri
+        context.startActivity(intent)
+    }
+
 }

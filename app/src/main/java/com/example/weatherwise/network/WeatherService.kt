@@ -1,7 +1,6 @@
 package com.example.weatherwise.network
 
-import com.example.weatherwise.model.WeatherResponse
-import retrofit2.Response
+import com.example.weatherwise.model.entities.WeatherResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 

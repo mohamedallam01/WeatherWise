@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/preferences_graph"
@@ -16,5 +17,13 @@
         android:id="@+id/mapFragment"
         android:name="com.example.weatherwise.map.view.MapFragment"
         android:label="fragment_map"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+        <argument
+            android:name="originFragment"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_mapFragment_to_home_graph"
+            app:destination="@id/home_graph" />
+    </fragment>
+    <include app:graph="@navigation/home_graph" />
 </navigation>

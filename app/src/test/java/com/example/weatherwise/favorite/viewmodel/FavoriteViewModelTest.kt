@@ -4,9 +4,12 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.weatherwise.data.source.FakeWeatherRepository
 import com.example.weatherwise.map.viewmodel.MapViewModel
-import com.example.weatherwise.model.FavoriteWeather
+import com.example.weatherwise.model.entities.FavoriteWeather
 import com.example.weatherwise.network.ApiState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -61,8 +64,7 @@ class FavoriteViewModelTest {
 
         //Then
         assertThat(result, not(nullValue()))
-//        assertThat(viewModel.favoriteWeather.value, not(nullValue()))
-//        assertThat(viewModel.favoriteWeather.getOrAwaitValue(), not(nullValue()))
+
 
     }
 
@@ -81,37 +83,36 @@ class FavoriteViewModelTest {
     }
 
     @Test
-    fun `get favorite weather details from remote, favorite1, the favorite of this location`()  {
-
-            //Given
-            val latitude = "37"
-            val longitude = "122"
-
-            //When
-            favViewModel.getFavoriteWeatherDetailsFromRemote(latitude, longitude)
-
-            //Then
-            assertThat(favViewModel.favWeatherDetails.value, not(nullValue()))
-            assertThat(favViewModel.favWeatherDetails.value, `is`(ApiState.Loading))
-
-        }
-
-    @Test
-    fun `get favorite by id, favorite1, the same favorite`() = runTest   {
+    fun `get favorite weather details from remote, favorite1, the favorite of this location`() {
 
         //Given
+        val latitude = "37"
+        val longitude = "122"
+
+        //When
+        favViewModel.getFavoriteWeatherDetailsFromRemote(latitude, longitude)
+
+        //Then
+        assertThat(favViewModel.favWeatherDetails.value, not(nullValue()))
+        assertThat(favViewModel.favWeatherDetails.value, `is`(ApiState.Loading))
+
+    }
+
+    @Test
+    fun `get favorite by id, favorite1, the same favorite`() = runTest {
+
+        // Given
         val favorite1 = FavoriteWeather(1)
         mapViewModel.insertFavoriteWeather(favorite1)
 
-        //When
-         favViewModel.getFavoriteById(favorite1.fav_id)
+        // When
+        favViewModel.getFavoriteById(favorite1.fav_id)
 
-        //Waiting
+
+        // Then
         val result = favViewModel.favoriteWeatherById.value
-
-        //Then
-        assertThat(result, not(nullValue()))
         assertThat(result, `is`(favorite1))
+
 
     }
 

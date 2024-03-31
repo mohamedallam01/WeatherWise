@@ -9,14 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.weatherwise.R
-import com.example.weatherwise.favorite.view.OnFavClickListener
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.DailyForecast
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.weatherwise.model.entities.Alert
 
 class AlertAdapter (private val context: Context,private val listener: OnAlertClickListener) :
     ListAdapter<Alert, AlertViewHolder>(AlertDiffUtil()) {

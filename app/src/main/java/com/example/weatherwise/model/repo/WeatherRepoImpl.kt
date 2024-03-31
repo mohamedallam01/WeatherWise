@@ -1,7 +1,10 @@
-package com.example.weatherwise.model
+package com.example.weatherwise.model.repo
 
 import android.util.Log
 import com.example.weatherwise.dp.WeatherLocalDataSource
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 import com.example.weatherwise.network.WeatherRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -39,10 +42,13 @@ class WeatherRepoImpl  constructor(
         }
     }
 
-    override fun getWeatherResponse(): Flow<WeatherResponse> {
-       // Log.d(TAG, "getWeatherResponse: ${weatherLocalDataSource.getWeatherResponse()}")
-        return weatherLocalDataSource.getWeatherResponse()
+    override fun getWeatherResponse(): Flow<WeatherResponse> = flow {
+        weatherLocalDataSource.getWeatherResponse().collect { weatherResponse ->
+            Log.d(TAG, "WeatherResponse: $weatherResponse")
+            emit(weatherResponse)
+        }
     }
+
 
     override fun getCurrentWeatherFromRemote(
         lat: String,
@@ -62,7 +68,7 @@ class WeatherRepoImpl  constructor(
         if (weatherResponseFromRemote != null) {
 
             try {
-                //weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
+                weatherLocalDataSource.insertWeatherResponse(weatherResponseFromRemote)
                 //Log.d(TAG, "getCurrentWeatherFromRemote: $weatherResponseFromRemote")
             } catch (exception: Exception) {
 

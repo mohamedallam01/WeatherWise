@@ -1,6 +1,6 @@
 package com.example.weatherwise.network
 
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.WeatherResponse
 
 sealed class ApiState {
     class Success(val data : WeatherResponse) : ApiState()

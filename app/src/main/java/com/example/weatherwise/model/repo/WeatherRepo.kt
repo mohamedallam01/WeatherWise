@@ -1,5 +1,8 @@
-package com.example.weatherwise.model
+package com.example.weatherwise.model.repo
 
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherRepo {

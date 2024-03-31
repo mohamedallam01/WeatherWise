@@ -1,7 +1,6 @@
-package com.example.weatherwise.model
+package com.example.weatherwise.model.entities
 
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 

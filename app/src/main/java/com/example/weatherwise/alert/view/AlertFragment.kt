@@ -1,12 +1,14 @@
 package com.example.weatherwise.alert.view
 
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Geocoder
@@ -23,46 +25,34 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.weatherwise.R
-import com.example.weatherwise.alert.ALERT_DESC
 import com.example.weatherwise.alert.CHANNEL_ID
-import com.example.weatherwise.alert.NOTIFICATION_ID
 import com.example.weatherwise.alert.NotificationReceiver
 import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
+import com.example.weatherwise.databinding.FragmentAlertBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
-import com.example.weatherwise.home.view.HomeHourlyAdapter
 import com.example.weatherwise.home.view.LATITUDE
 import com.example.weatherwise.home.view.LOCATION
 import com.example.weatherwise.home.view.LONGITUDE
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.WeatherRepoImpl
-import com.example.weatherwise.network.ApiState
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.getAddress
 import com.example.weatherwise.util.round
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
+const val ALERT_TYPE = "alarm_type"
 
 class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     TimePickerDialog.OnTimeSetListener, OnAlertClickListener {
 
     private val TAG = "AlertFragment"
-
-
-    private lateinit var fabAddAlert: FloatingActionButton
-
 
     private var day: Int = 0
     private var month: Int = 0
@@ -75,6 +65,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     private var savedYear: Int = 0
     private var savedHour: Int = 0
     private var savedMinute: Int = 0
+
+    private lateinit var binding: FragmentAlertBinding
 
     private lateinit var sdf: SimpleDateFormat
     private lateinit var calendar: Calendar
@@ -89,12 +81,9 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     private var latitudeFromPrefs: String? = null
     private var longitudeFromPrefs: String? = null
-
-    var alertId: Int? = null
-
+    private var selectedOption = ""
     val calender = Calendar.getInstance()
 
-    private lateinit var rvAlerts: RecyclerView
     private lateinit var alertAdapter: AlertAdapter
     private var insertedAlert: Alert? = null
     private lateinit var alarmManager: AlarmManager
@@ -116,22 +105,21 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_alert, container, false)
+
+        binding = FragmentAlertBinding.inflate(inflater, container, false)
+        return binding.root
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fabAddAlert = view.findViewById(R.id.fab_add_alert)
-        rvAlerts = view.findViewById(R.id.rv_alerts)
-
         locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
         alertAdapter = AlertAdapter(requireContext(), this)
-        rvAlerts.adapter = alertAdapter
-        rvAlerts.layoutManager =
+        binding.rvAlerts.adapter = alertAdapter
+        binding.rvAlerts.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
 
@@ -226,24 +214,52 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
 
     private fun pickDate() {
-        fabAddAlert.setOnClickListener {
+        binding.fabAddAlert.setOnClickListener {
 
-            if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
-                year = calender.get(Calendar.YEAR)
-                month = calender.get(Calendar.MONTH)
-                day = calender.get(Calendar.DAY_OF_MONTH)
-                DatePickerDialog(requireContext(), this, year, month, day).show()
+            if(ChecksManager.checkConnection(requireContext())){
+                showNotificationAlarmDialog { alertType ->
+                    if (alertType == "Alarm") {
+                        if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
+                            year = calender.get(Calendar.YEAR)
+                            month = calender.get(Calendar.MONTH)
+                            day = calender.get(Calendar.DAY_OF_MONTH)
+                            DatePickerDialog(requireContext(), this, year, month, day).show()
 
 
-            } else {
-                ChecksManager.requestDrawOverlayPermission(requireActivity())
+                        } else {
+                            ChecksManager.requestDrawOverlayPermission(requireActivity())
+                        }
+                    } else if (alertType == "Notification") {
+
+                        if (ChecksManager.notificationPermission(requireActivity())) {
+                            year = calender.get(Calendar.YEAR)
+                            month = calender.get(Calendar.MONTH)
+                            day = calender.get(Calendar.DAY_OF_MONTH)
+                            DatePickerDialog(requireContext(), this, year, month, day).show()
+
+
+                        } else {
+                            ChecksManager.requestNotificationPermission(requireActivity())
+                        }
+                    }
+
+                }
             }
+
+            else{
+                Toast.makeText(requireContext(),"Check Your Internet Connection",  Toast.LENGTH_SHORT).show()
+            }
+
+
+
 
         }
     }
 
     private fun scheduleNotification(dateTimeInMillis: Long) {
 
+        broadcastIntent.putExtra(ALERT_TYPE, selectedOption)
+        Log.d(TAG, "scheduleNotification: $selectedOption")
         pendingIntent = PendingIntent.getBroadcast(
             requireContext(),
             dateTimeInMillis.toInt(), broadcastIntent,
@@ -292,18 +308,58 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     }
 
     override fun deleteAlert(alert: Alert) {
-        lifecycleScope.launch {
-            alertViewModel.deleteAlert(alert)
-            val timeInMillis = getDateTimeCalender().toInt()
-            pendingIntent = PendingIntent.getBroadcast(
-                requireContext(),
-                timeInMillis, broadcastIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            Log.d(TAG, "deleteAlert id: $timeInMillis ")
-            alarmManager.cancel(pendingIntent)
 
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Delete Item")
+        builder.setMessage("Are you sure you want to delete this item?")
+        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
+            lifecycleScope.launch {
+                alertViewModel.deleteAlert(alert)
+                val timeInMillis = getDateTimeCalender().toInt()
+                pendingIntent = PendingIntent.getBroadcast(
+                    requireContext(),
+                    timeInMillis, broadcastIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                Log.d(TAG, "deleteAlert id: $timeInMillis ")
+                alarmManager.cancel(pendingIntent)
+
+            }
+            Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show()
+            dialogInterface.dismiss()
         }
+        builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
+            dialogInterface.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
+
+    }
+
+
+    fun showNotificationAlarmDialog(callback: (String) -> Unit) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Select Option")
+
+        val options = arrayOf("Notification", "Alarm")
+        var checkedItem = 0
+
+        builder.setSingleChoiceItems(options, checkedItem) { _, which ->
+            checkedItem = which
+        }
+
+        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
+            selectedOption = options[checkedItem]
+            callback(selectedOption)
+            dialogInterface.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
+            dialogInterface.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
     }
 
 

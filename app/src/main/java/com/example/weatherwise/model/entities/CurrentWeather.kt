@@ -1,4 +1,4 @@
-package com.example.weatherwise.model
+package com.example.weatherwise.model.entities
 
 data class CurrentWeather(
     var dt: Long = 0,

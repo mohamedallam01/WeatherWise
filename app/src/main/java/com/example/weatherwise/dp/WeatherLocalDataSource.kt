@@ -1,8 +1,8 @@
 package com.example.weatherwise.dp
 
-import com.example.weatherwise.model.Alert
-import com.example.weatherwise.model.FavoriteWeather
-import com.example.weatherwise.model.WeatherResponse
+import com.example.weatherwise.model.entities.Alert
+import com.example.weatherwise.model.entities.FavoriteWeather
+import com.example.weatherwise.model.entities.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherLocalDataSource {
