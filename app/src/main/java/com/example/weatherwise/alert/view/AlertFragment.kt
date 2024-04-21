@@ -27,12 +27,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.weatherwise.R
+
 import com.example.weatherwise.alert.CHANNEL_ID
 import com.example.weatherwise.alert.NotificationReceiver
 import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
 import com.example.weatherwise.databinding.FragmentAlertBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
+import com.example.weatherwise.home.view.LATITUDE
+import com.example.weatherwise.home.view.LOCATION
+import com.example.weatherwise.home.view.LONGITUDE
 import com.example.weatherwise.model.entities.Alert
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
@@ -117,7 +121,9 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            locationSharedPreferences =
+
+
+        locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
         alertAdapter = AlertAdapter(requireContext(), this)
@@ -242,6 +248,23 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                     } else if (alertType == "Notification") {
 
                         if (ChecksManager.notificationPermission(requireActivity())) {
+
+            if(ChecksManager.checkConnection(requireContext())){
+                showNotificationAlarmDialog { alertType ->
+                    if (alertType == "Alarm") {
+                        if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
+                            year = calender.get(Calendar.YEAR)
+                            month = calender.get(Calendar.MONTH)
+                            day = calender.get(Calendar.DAY_OF_MONTH)
+                            DatePickerDialog(requireContext(), this, year, month, day).show()
+
+
+                        } else {
+                            ChecksManager.requestDrawOverlayPermission(requireActivity())
+                        }
+                    } else if (alertType == "Notification") {
+
+                        if (ChecksManager.notificationPermission(requireActivity())) {
                             year = calender.get(Calendar.YEAR)
                             month = calender.get(Calendar.MONTH)
                             day = calender.get(Calendar.DAY_OF_MONTH)
@@ -254,6 +277,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                     }
 
                 }
+            }
             }
 
             else{
@@ -344,6 +368,39 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         val dialog = builder.create()
         dialog.show()
 
+        }
+        builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
+            dialogInterface.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
+
+    }
+
+
+    fun showNotificationAlarmDialog(callback: (String) -> Unit) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Select Option")
+
+        val options = arrayOf("Notification", "Alarm")
+        var checkedItem = 0
+
+        builder.setSingleChoiceItems(options, checkedItem) { _, which ->
+            checkedItem = which
+        }
+
+        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
+            selectedOption = options[checkedItem]
+            callback(selectedOption)
+            dialogInterface.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
+            dialogInterface.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
     }
 
 

@@ -8,6 +8,7 @@
 
     <com.github.matteobattilana.weather.WeatherView
         android:id="@+id/weather_view_fav"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -157,7 +158,7 @@
                                 android:text="@string/humidity"
                                 android:textColor="@color/card_text"
                                 android:textSize="20sp"
-                                android:textStyle="bold"
+                android:textStyle="bold"
                                 app:layout_constraintEnd_toStartOf="@id/tv_wind_speed_title"
                                 app:layout_constraintStart_toEndOf="@id/iv_humidity"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -176,6 +177,7 @@
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:layout_marginStart="230dp"
+
                                 android:contentDescription="@string/wind_speed_icon"
                                 android:src="@drawable/baseline_wind_power_24"
                                 app:layout_constraintBottom_toBottomOf="@id/tv_wind_speed_desc"
@@ -216,7 +218,6 @@
                                 android:src="@drawable/pressure"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintStart_toStartOf="parent" />
-
                             <TextView
                                 android:id="@+id/tv_pressure_title"
                                 android:layout_width="wrap_content"
@@ -226,6 +227,7 @@
                                 android:textColor="@color/card_text"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
+
                                 app:layout_constraintLeft_toLeftOf="@id/tv_humidity_title"
                                 app:layout_constraintRight_toRightOf="@id/tv_humidity_title"
                                 app:layout_constraintTop_toBottomOf="@id/tv_humidity_desc" />
@@ -258,7 +260,7 @@
                                 android:text="@string/clouds"
                                 android:textColor="@color/card_text"
                                 android:textSize="20sp"
-                                android:textStyle="bold"
+                 android:textStyle="bold"
 
                                 app:layout_constraintLeft_toLeftOf="@id/tv_wind_speed_title"
                                 app:layout_constraintRight_toRightOf="@id/tv_wind_speed_title"

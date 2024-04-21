@@ -25,8 +25,7 @@ import com.example.weatherwise.R
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.PREFERENCES_FRAGMENT
 import java.util.Locale
-
-
+import java.util.Locale
 
 class PreferencesFragment : PreferenceFragmentCompat() {
 

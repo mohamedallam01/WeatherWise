@@ -26,6 +26,8 @@ import com.example.weatherwise.util.LATITUDE
 import com.example.weatherwise.util.LOCATION
 import com.example.weatherwise.util.LONGITUDE
 import com.example.weatherwise.util.PREFERENCES_FRAGMENT
+import com.example.weatherwise.preferences.PREFERENCES_FRAGMENT
+import com.example.weatherwise.util.HOME_FRAGMENT
 import com.example.weatherwise.util.getAddress
 import com.example.weatherwise.util.round
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +41,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.Locale
-
 
 
 class MapFragment : Fragment(), MapEventsReceiver {
@@ -136,6 +137,10 @@ class MapFragment : Fragment(), MapEventsReceiver {
 
                 withContext(Dispatchers.Main) {
                     city = (address?.locality ?: address?.extras?.getString("sub-admin", "Unknown area")) ?:"inKnown"
+                    )!!
+
+                withContext(Dispatchers.Main) {
+                    city = address.locality ?: address.extras.getString("sub-admin", "Unknown area")
                     fav = FavoriteWeather(lat = latitude, lon = longitude, timezone = city)
 
                 }

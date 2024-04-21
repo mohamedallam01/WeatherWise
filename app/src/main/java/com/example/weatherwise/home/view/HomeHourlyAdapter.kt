@@ -18,6 +18,9 @@ import com.example.weatherwise.util.FAHRENHEIT
 import com.example.weatherwise.util.KELVIN
 import com.example.weatherwise.util.LANG_KEY
 import com.example.weatherwise.util.TEMP_UNIT_KEY
+
+import com.example.weatherwise.preferences.LANG_KEY
+import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

@@ -116,6 +116,7 @@ class DetailsFavoriteFragment : Fragment() {
                             "Rain" -> binding.weatherViewFav.setWeatherData(PrecipType.RAIN)
                             "Snow" -> binding.weatherViewFav.setWeatherData(PrecipType.SNOW)
                             "Clear" -> binding.weatherViewFav.setWeatherData(
+                          
                                 PrecipType.CLEAR
                             )
                         }
