@@ -47,6 +47,8 @@ class MainActivity : AppCompatActivity() {
 
     private var isPermissionGranted = false
 
+    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var homeViewModelFactory: HomeViewModelFactory
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +59,18 @@ class MainActivity : AppCompatActivity() {
         initialSharedPreferences = getSharedPreferences(INITIAL_PREFS, Context.MODE_PRIVATE)
         fragment = findViewById(R.id.nav_host_fragment)
         Log.d(TAG, "onCreate: ")
+
+
+        binding.clDeniedPermissions.visibility = View.GONE
+
+        homeViewModelFactory = HomeViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(this)
+            )
+        )
+
+        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
 
 
         binding.clDeniedPermissions.visibility = View.GONE

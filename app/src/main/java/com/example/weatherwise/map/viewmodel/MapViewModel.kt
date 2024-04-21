@@ -18,29 +18,6 @@ class MapViewModel (private val _repo: WeatherRepo) : ViewModel() {
         WeatherResponse()
     )
      val favoriteWeather = _favoriteWeather.asStateFlow()
-//    fun setAlertLocation(lat: String, lon: String, language: String, units: String) {
-//
-//        getFavoriteWeatherFromDataBase(lat,lon,language,units)
-//    }
-
-
-//    private fun getFavoriteWeatherFromDataBase(
-//        lat: String,
-//        lon: String,
-//        language: String,
-//        units: String
-//    ) {
-//
-//        viewModelScope.launch(Dispatchers.IO) {
-//            _repo.getFavoriteWeather().collect {
-//                _favoriteWeather.postValue(it)
-//                Log.d(TAG, "getCurrentWeather From database: ${favoriteWeather.value}")
-//            }
-//
-//        }
-//
-//
-//    }
 
     fun insertFavoriteWeather(favoriteWeather: FavoriteWeather){
         viewModelScope.launch(Dispatchers.IO) {

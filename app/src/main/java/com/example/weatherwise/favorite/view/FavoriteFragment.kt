@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.airbnb.lottie.LottieAnimationView
 import com.example.weatherwise.databinding.FragmentFavoriteBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.favorite.viewmodel.FavoriteViewModel
@@ -21,10 +22,10 @@ import com.example.weatherwise.model.entities.FavoriteWeather
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.FAVORITE_FRAGMENT
 import kotlinx.coroutines.launch
 
 
-const val FAVORITE_FRAGMENT = "favorite_fragment"
 
 class FavoriteFragment : Fragment(), OnFavClickListener {
 
@@ -93,7 +94,14 @@ class FavoriteFragment : Fragment(), OnFavClickListener {
         favoriteViewModel.getFavoriteWeatherFromDataBase()
         lifecycleScope.launch {
             favoriteViewModel.favoriteWeather.collect {
-                favoriteAdapter.submitList(it)
+                if (it.isEmpty()){
+                    binding.emptyAnimationViewFav.visibility = View.VISIBLE
+                }
+                else{
+                    binding.emptyAnimationViewFav.visibility = View.GONE
+                    favoriteAdapter.submitList(it)
+
+                }
             }
         }
 

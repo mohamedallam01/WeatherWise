@@ -15,15 +15,17 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherwise.R
 import com.example.weatherwise.databinding.FragmentMapBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
-import com.example.weatherwise.favorite.view.FAVORITE_FRAGMENT
-import com.example.weatherwise.home.view.LATITUDE
-import com.example.weatherwise.home.view.LOCATION
-import com.example.weatherwise.home.view.LONGITUDE
 import com.example.weatherwise.map.viewmodel.MapViewModel
 import com.example.weatherwise.map.viewmodel.MapViewModelFactory
 import com.example.weatherwise.model.entities.FavoriteWeather
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
+import com.example.weatherwise.util.FAVORITE_FRAGMENT
+import com.example.weatherwise.util.HOME_FRAGMENT
+import com.example.weatherwise.util.LATITUDE
+import com.example.weatherwise.util.LOCATION
+import com.example.weatherwise.util.LONGITUDE
+import com.example.weatherwise.util.PREFERENCES_FRAGMENT
 import com.example.weatherwise.preferences.PREFERENCES_FRAGMENT
 import com.example.weatherwise.util.HOME_FRAGMENT
 import com.example.weatherwise.util.getAddress
@@ -40,9 +42,6 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.Locale
 
-
-const val ORIGIN_FRAGMENT = "origin_fragment"
-const val MAP_FRAGMENT = "map_fragment"
 
 class MapFragment : Fragment(), MapEventsReceiver {
 
@@ -134,6 +133,10 @@ class MapFragment : Fragment(), MapEventsReceiver {
                     geocoder.getAddress(
                         latitude.round(4),
                         longitude.round(4)
+                    )
+
+                withContext(Dispatchers.Main) {
+                    city = (address?.locality ?: address?.extras?.getString("sub-admin", "Unknown area")) ?:"inKnown"
                     )!!
 
                 withContext(Dispatchers.Main) {

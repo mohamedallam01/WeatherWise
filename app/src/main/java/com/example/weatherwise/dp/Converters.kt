@@ -35,17 +35,6 @@ object Converters {
     }
 
 
-//    @TypeConverter
-//    fun toMinutelyForecast(value: String): List<MinutelyForecast> {
-//        val listType = object : TypeToken<List<MinutelyForecast>>() {}.type
-//        return Gson().fromJson(value, listType)
-//    }
-//
-//    @TypeConverter
-//    fun fromMinutelyForecast(list: List<MinutelyForecast>): String {
-//        return Gson().toJson(list)
-//    }
-
     @TypeConverter
     fun toDailyForecast(value: String): List<DailyForecast> {
         val listType = object : TypeToken<List<DailyForecast>>() {}.type

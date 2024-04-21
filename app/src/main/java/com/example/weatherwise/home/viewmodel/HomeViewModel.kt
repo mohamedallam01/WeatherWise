@@ -67,7 +67,6 @@ class HomeViewModel(private val _repo: WeatherRepo) : ViewModel() {
 
     }
 
-
     private fun getCurrentWeatherFromDataBase() {
         viewModelScope.launch(Dispatchers.IO) {
             _repo.getWeatherResponse().collectLatest { weatherResponse ->

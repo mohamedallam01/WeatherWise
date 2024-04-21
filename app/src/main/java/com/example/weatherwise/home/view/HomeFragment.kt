@@ -10,10 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -22,9 +19,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherwise.R
 import com.example.weatherwise.databinding.FragmentHomeBinding
+import com.example.weatherwise.home.viewmodel.HomeViewModel
+import com.example.weatherwise.model.entities.WeatherResponse
+import com.example.weatherwise.network.ApiState
+import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.FAHRENHEIT
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
@@ -36,12 +37,20 @@ import com.example.weatherwise.preferences.LANG_KEY
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.GPS
+import com.example.weatherwise.util.IMPERIAL
 import com.example.weatherwise.util.INITIAL_CHOICE
 import com.example.weatherwise.util.INITIAL_PREFS
+import com.example.weatherwise.util.KELVIN
+import com.example.weatherwise.util.LANG_KEY
+import com.example.weatherwise.util.LATITUDE
+import com.example.weatherwise.util.LOCATION
+import com.example.weatherwise.util.LONGITUDE
+import com.example.weatherwise.util.METRIC
+import com.example.weatherwise.util.STANDARD
+import com.example.weatherwise.util.TEMP_UNIT_KEY
 import com.example.weatherwise.util.getAddress
 import com.example.weatherwise.util.round
 import com.github.matteobattilana.weather.PrecipType
-import com.github.matteobattilana.weather.WeatherView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
@@ -54,16 +63,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
-const val LOCATION = "Location"
-const val LATITUDE = "latitude"
-const val LONGITUDE = "longitude"
-const val KELVIN = "kelvin"
-const val CELSIUS = "celsius"
-const val FAHRENHEIT = "fahrenheit"
-const val METRIC = "metric"
-const val STANDARD = "standard"
-const val IMPERIAL = "imperial"
 
 class HomeFragment : Fragment() {
 
@@ -80,7 +79,8 @@ class HomeFragment : Fragment() {
     private var locationInitialPrefs = ""
     private var latitudeFromPrefs: String? = null
     private var longitudeFromPrefs: String? = null
-    private lateinit var homeViewModel: HomeViewModel
+    private val homeViewModel: HomeViewModel by activityViewModels()
+
     private lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var binding: FragmentHomeBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,20 +117,6 @@ class HomeFragment : Fragment() {
         binding.rvDaily.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-
-//        val homeArgs = HomeFragmentArgs.fromBundle(requireArguments())
-//        mapFragmentKey = homeArgs.mapFragemnt
-
-//        lifecycleScope.launch {
-//            homeViewModel.currentWeather.observe(viewLifecycleOwner) { weatherResponse ->
-//                weatherResponse?.let {
-//                    Log.d(TAG, "currentWeatherFromDatabase: ${it} ")
-//                    progressBar.visibility = View.GONE
-//                    setHomeData(it)
-//                    homeHourlyAdapter.submitList(it.hourly)
-//                    homeDailyAdapter.submitList(it.daily)
-//                }
-//            }
 
         homeViewModelFactory = HomeViewModelFactory(
             WeatherRepoImpl.getInstance(
@@ -219,7 +205,6 @@ class HomeFragment : Fragment() {
                 repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     homeViewModel.currentWeatherFromDatabase.collectLatest { result ->
                         binding.progressBar.visibility = View.GONE
-                        //Log.d(TAG, "Success Result: ${result.data.alerts} ")
                         setHomeData(result)
                         homeHourlyAdapter.submitList(result.hourly)
                         homeDailyAdapter.submitList(result.daily)
@@ -270,12 +255,7 @@ class HomeFragment : Fragment() {
             else -> METRIC
 
         }
-        Log.d(TAG, "Temp unit from prefs changed: $tempUnit ")
 
-        Log.d(
-            TAG,
-            "Latitude fro prefs: $latitudeFromPrefs, Longitude from prefs: $longitudeFromPrefs "
-        )
 
         if (latitudeFromPrefs != null && longitudeFromPrefs != null) {
             homeViewModel.setCurrentLocation(
@@ -316,10 +296,10 @@ class HomeFragment : Fragment() {
                 geocoder.getAddress(
                     latitudeFromPrefs?.toDouble()?.round(4) ?: 0.0,
                     longitudeFromPrefs?.toDouble()?.round(4) ?: 0.0
-                )!!
+                )
 
 
-            val city = address.locality ?: address.extras.getString("sub-admin", "Unknown area")
+            val city = address?.locality ?: address?.extras?.getString("sub-admin", "Unknown area")?: "unknown"
             Log.d(TAG, "locality $city ")
 
             binding.cvDetails.visibility = View.VISIBLE
@@ -402,6 +382,5 @@ class HomeFragment : Fragment() {
 
 
 }
-
 
 

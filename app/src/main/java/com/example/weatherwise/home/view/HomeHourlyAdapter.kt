@@ -14,6 +14,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.weatherwise.R
 import com.example.weatherwise.model.entities.HourlyForecast
+import com.example.weatherwise.util.FAHRENHEIT
+import com.example.weatherwise.util.KELVIN
+import com.example.weatherwise.util.LANG_KEY
+import com.example.weatherwise.util.TEMP_UNIT_KEY
+
 import com.example.weatherwise.preferences.LANG_KEY
 import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import java.text.SimpleDateFormat
