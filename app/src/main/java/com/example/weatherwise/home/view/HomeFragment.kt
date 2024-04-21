@@ -14,20 +14,15 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherwise.R
 import com.example.weatherwise.databinding.FragmentHomeBinding
-import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
 import com.example.weatherwise.model.entities.WeatherResponse
-import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
-import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.FAHRENHEIT
 import com.example.weatherwise.util.GPS
@@ -74,8 +69,6 @@ class HomeFragment : Fragment() {
     private var latitudeFromPrefs: String? = null
     private var longitudeFromPrefs: String? = null
     private val homeViewModel: HomeViewModel by activityViewModels()
-
-    private lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var binding: FragmentHomeBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,15 +104,6 @@ class HomeFragment : Fragment() {
         binding.rvDaily.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-
-        homeViewModelFactory = HomeViewModelFactory(
-            WeatherRepoImpl.getInstance(
-                WeatherRemoteDataSourceImpl.getInstance(),
-                WeatherLocalDataSourceImpl(requireContext())
-            )
-        )
-
-        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
 
 
         locationSharedPreferences =

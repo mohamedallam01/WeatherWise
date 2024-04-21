@@ -2,14 +2,7 @@ package com.example.weatherwise.preferences
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.app.LocaleManager
-import android.content.Context
-import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
-import android.os.LocaleList
-import android.util.Log
-import android.view.Display.Mode
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -20,12 +13,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreference
 import com.example.weatherwise.R
 import com.example.weatherwise.util.ChecksManager
 import com.example.weatherwise.util.PREFERENCES_FRAGMENT
-import java.util.Locale
-import java.util.Locale
 
 class PreferencesFragment : PreferenceFragmentCompat() {
 
