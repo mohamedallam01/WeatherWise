@@ -21,11 +21,6 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherwise.R
 import com.example.weatherwise.databinding.FragmentHomeBinding
-import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.model.entities.WeatherResponse
-import com.example.weatherwise.network.ApiState
-import com.example.weatherwise.util.ChecksManager
-import com.example.weatherwise.util.FAHRENHEIT
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
 import com.example.weatherwise.home.viewmodel.HomeViewModel
 import com.example.weatherwise.home.viewmodel.HomeViewModelFactory
@@ -33,9 +28,8 @@ import com.example.weatherwise.model.entities.WeatherResponse
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.ApiState
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
-import com.example.weatherwise.preferences.LANG_KEY
-import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.FAHRENHEIT
 import com.example.weatherwise.util.GPS
 import com.example.weatherwise.util.IMPERIAL
 import com.example.weatherwise.util.INITIAL_CHOICE

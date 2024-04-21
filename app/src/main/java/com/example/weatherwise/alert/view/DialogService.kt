@@ -32,14 +32,6 @@ import com.example.weatherwise.util.LATITUDE
 import com.example.weatherwise.util.LOCATION
 import com.example.weatherwise.util.LONGITUDE
 import com.example.weatherwise.util.TEMP_UNIT_KEY
-import com.example.weatherwise.home.view.LATITUDE
-import com.example.weatherwise.home.view.LOCATION
-import com.example.weatherwise.home.view.LONGITUDE
-import com.example.weatherwise.model.repo.WeatherRepo
-import com.example.weatherwise.model.repo.WeatherRepoImpl
-import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
-import com.example.weatherwise.preferences.LANG_KEY
-import com.example.weatherwise.preferences.TEMP_UNIT_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest

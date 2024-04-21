@@ -27,16 +27,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.weatherwise.R
-
 import com.example.weatherwise.alert.CHANNEL_ID
 import com.example.weatherwise.alert.NotificationReceiver
 import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
 import com.example.weatherwise.databinding.FragmentAlertBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
-import com.example.weatherwise.home.view.LATITUDE
-import com.example.weatherwise.home.view.LOCATION
-import com.example.weatherwise.home.view.LONGITUDE
 import com.example.weatherwise.model.entities.Alert
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
@@ -121,8 +117,6 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
         locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
@@ -148,9 +142,10 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         lifecycleScope.launch {
             alertViewModel.allAlerts.collect {
 
-                if (it.isEmpty()) {
+                if (it.isEmpty()){
                     binding.emptyAnimationViewAlert.visibility = View.VISIBLE
-                } else {
+                }
+                else{
                     binding.emptyAnimationViewAlert.visibility = View.GONE
                     alertAdapter.submitList(it)
                 }
@@ -199,8 +194,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                     latitudeFromPrefs?.toDouble()?.round(4) ?: 0.0,
                     longitudeFromPrefs?.toDouble()?.round(4) ?: 0.0
                 )
-            val city = address?.locality ?: address?.extras?.getString("sub-admin", "Unknown area")
-            ?: "Unknown"
+            val city = address?.locality ?: address?.extras?.getString("sub-admin", "Unknown area") ?: "Unknown"
             val dateAndTime = sdf.format(calendar.time).split(" ")
 
             withContext(Dispatchers.Main) {
@@ -232,7 +226,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     private fun pickDate() {
         binding.fabAddAlert.setOnClickListener {
 
-            if (ChecksManager.checkConnection(requireContext())) {
+            if(ChecksManager.checkConnection(requireContext())){
                 showNotificationAlarmDialog { alertType ->
                     if (alertType == "Alarm") {
                         if (ChecksManager.isDrawOverlayPermissionGranted(requireActivity())) {
@@ -248,209 +242,136 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                     } else if (alertType == "Notification") {
 
                         if (ChecksManager.notificationPermission(requireActivity())) {
-
-                            if (ChecksManager.checkConnection(requireContext())) {
-                                showNotificationAlarmDialog { alertType ->
-                                    if (alertType == "Alarm") {
-                                        if (ChecksManager.isDrawOverlayPermissionGranted(
-                                                requireActivity()
-                                            )
-                                        ) {
-                                            year = calender.get(Calendar.YEAR)
-                                            month = calender.get(Calendar.MONTH)
-                                            day = calender.get(Calendar.DAY_OF_MONTH)
-                                            DatePickerDialog(
-                                                requireContext(),
-                                                this,
-                                                year,
-                                                month,
-                                                day
-                                            ).show()
+                            year = calender.get(Calendar.YEAR)
+                            month = calender.get(Calendar.MONTH)
+                            day = calender.get(Calendar.DAY_OF_MONTH)
+                            DatePickerDialog(requireContext(), this, year, month, day).show()
 
 
-                                        } else {
-                                            ChecksManager.requestDrawOverlayPermission(
-                                                requireActivity()
-                                            )
-                                        }
-                                    } else if (alertType == "Notification") {
-
-                                        if (ChecksManager.notificationPermission(requireActivity())) {
-                                            year = calender.get(Calendar.YEAR)
-                                            month = calender.get(Calendar.MONTH)
-                                            day = calender.get(Calendar.DAY_OF_MONTH)
-                                            DatePickerDialog(
-                                                requireContext(),
-                                                this,
-                                                year,
-                                                month,
-                                                day
-                                            ).show()
-
-
-                                        } else {
-                                            ChecksManager.requestNotificationPermission(
-                                                requireActivity()
-                                            )
-                                        }
-                                    }
-
-                                }
-                            }
                         } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "Check Your Internet Connection",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            ChecksManager.requestNotificationPermission(requireActivity())
                         }
-
-
-                    }
-                }
-
-                private fun scheduleNotification(dateTimeInMillis: Long) {
-
-                    broadcastIntent.putExtra(ALERT_TYPE, selectedOption)
-                    Log.d(TAG, "scheduleNotification: $selectedOption")
-                    pendingIntent = PendingIntent.getBroadcast(
-                        requireContext(),
-                        dateTimeInMillis.toInt(), broadcastIntent,
-                        PendingIntent.FLAG_IMMUTABLE
-                    )
-
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            dateTimeInMillis,
-                            pendingIntent
-                        )
-                    } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            dateTimeInMillis,
-                            pendingIntent
-                        )
-                    } else {
-                        alarmManager.set(
-                            AlarmManager.RTC_WAKEUP,
-                            dateTimeInMillis,
-                            pendingIntent
-                        )
-                    }
-
-
-                }
-
-
-                private fun createNotificationChannel() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        val name = "Weather Channel"
-                        val desc = "Weather Desc"
-                        val importance = NotificationManager.IMPORTANCE_DEFAULT
-                        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                            description = desc
-                        }
-                        val notificationManger =
-                            requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        notificationManger.createNotificationChannel(channel)
-
                     }
 
                 }
+            }
 
-                override fun deleteAlert(alert: Alert) {
-
-                    val builder = AlertDialog.Builder(context)
-                    builder.setTitle("Delete Item")
-                    builder.setMessage("Are you sure you want to delete this item?")
-                    builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
-                        lifecycleScope.launch {
-                            alertViewModel.deleteAlert(alert)
-                            val timeInMillis = getDateTimeCalender().toInt()
-                            pendingIntent = PendingIntent.getBroadcast(
-                                requireContext(),
-                                timeInMillis, broadcastIntent,
-                                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                            )
-                            Log.d(TAG, "deleteAlert id: $timeInMillis ")
-                            alarmManager.cancel(pendingIntent)
-
-                        }
-                        Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show()
-                        dialogInterface.dismiss()
-                    }
-                    builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
-                        dialogInterface.dismiss()
-                    }
-                    val dialog = builder.create()
-                    dialog.show()
-
-                }
-                builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
-                    dialogInterface.dismiss()
-                }
-                val dialog = builder.create()
-                dialog.show()
-
+            else{
+                Toast.makeText(requireContext(),"Check Your Internet Connection",  Toast.LENGTH_SHORT).show()
             }
 
 
-            fun showNotificationAlarmDialog(callback: (String) -> Unit) {
-                val builder = AlertDialog.Builder(context)
-                builder.setTitle("Select Option")
-
-                val options = arrayOf("Notification", "Alarm")
-                var checkedItem = 0
-
-                builder.setSingleChoiceItems(options, checkedItem) { _, which ->
-                    checkedItem = which
-                }
-
-                builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
-                    selectedOption = options[checkedItem]
-                    callback(selectedOption)
-                    dialogInterface.dismiss()
-                }
-
-                builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
-                    dialogInterface.dismiss()
-                }
-
-                val dialog = builder.create()
-                dialog.show()
-            }
-
-
-            fun showNotificationAlarmDialog(callback: (String) -> Unit) {
-                val builder = AlertDialog.Builder(context)
-                builder.setTitle("Select Option")
-
-                val options = arrayOf("Notification", "Alarm")
-                var checkedItem = 0
-
-                builder.setSingleChoiceItems(options, checkedItem) { _, which ->
-                    checkedItem = which
-                }
-
-                builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
-                    selectedOption = options[checkedItem]
-                    callback(selectedOption)
-                    dialogInterface.dismiss()
-                }
-
-                builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
-                    dialogInterface.dismiss()
-                }
-
-                val dialog = builder.create()
-                dialog.show()
-            }
 
 
         }
     }
+
+    private fun scheduleNotification(dateTimeInMillis: Long) {
+
+        broadcastIntent.putExtra(ALERT_TYPE, selectedOption)
+        Log.d(TAG, "scheduleNotification: $selectedOption")
+        pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            dateTimeInMillis.toInt(), broadcastIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                dateTimeInMillis,
+                pendingIntent
+            )
+        }
+
+
+    }
+
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Weather Channel"
+            val desc = "Weather Desc"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = desc
+            }
+            val notificationManger =
+                requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManger.createNotificationChannel(channel)
+
+        }
+
+    }
+
+    override fun deleteAlert(alert: Alert) {
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Delete Item")
+        builder.setMessage("Are you sure you want to delete this item?")
+        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
+            lifecycleScope.launch {
+                alertViewModel.deleteAlert(alert)
+                val timeInMillis = getDateTimeCalender().toInt()
+                pendingIntent = PendingIntent.getBroadcast(
+                    requireContext(),
+                    timeInMillis, broadcastIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                Log.d(TAG, "deleteAlert id: $timeInMillis ")
+                alarmManager.cancel(pendingIntent)
+
+            }
+            Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show()
+            dialogInterface.dismiss()
+        }
+        builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
+            dialogInterface.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
+
+    }
+
+
+    fun showNotificationAlarmDialog(callback: (String) -> Unit) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Select Option")
+
+        val options = arrayOf("Notification", "Alarm")
+        var checkedItem = 0
+
+        builder.setSingleChoiceItems(options, checkedItem) { _, which ->
+            checkedItem = which
+        }
+
+        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, _: Int ->
+            selectedOption = options[checkedItem]
+            callback(selectedOption)
+            dialogInterface.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialogInterface: DialogInterface, _: Int ->
+            dialogInterface.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
 
 }
 
