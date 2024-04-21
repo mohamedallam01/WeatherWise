@@ -13,19 +13,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import com.example.weatherwise.home.view.HomeFragmentDirections
 import com.example.weatherwise.home.viewmodel.HomeViewModel
-import com.example.weatherwise.preferences.LOCATION_GPS_KEY
 
-
-const val INITIAL_PREFS = "InitialPreferences"
-const val INITIAL_CHOICE = "initialChoice"
-const val HOME_FRAGMENT = "home_fragment"
-const val GPS = "GPS"
-const val LOCATION = "Location"
 
 class InitialSetupDialog : DialogFragment() {
 
     private val TAG = "InitialSetupDialog"
-
     private val homeViewModel: HomeViewModel by activityViewModels()
     private var positiveButtonListener: DialogInterface.OnClickListener? = null
     lateinit var initialPrefs: SharedPreferences

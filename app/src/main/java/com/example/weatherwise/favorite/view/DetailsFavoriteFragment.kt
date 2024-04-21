@@ -113,9 +113,9 @@ class DetailsFavoriteFragment : Fragment() {
                         homeDailyAdapter.submitList(result.data.daily)
 
                         when (result.data.current.weather[0].main) {
-                            "Rain" -> binding.weatherViewFavDetails.setWeatherData(PrecipType.RAIN)
-                            "Snow" -> binding.weatherViewFavDetails.setWeatherData(PrecipType.SNOW)
-                            "Clear" -> binding.weatherViewFavDetails.setWeatherData(
+                            "Rain" -> binding.weatherViewFav.setWeatherData(PrecipType.RAIN)
+                            "Snow" -> binding.weatherViewFav.setWeatherData(PrecipType.SNOW)
+                            "Clear" -> binding.weatherViewFav.setWeatherData(
                                 PrecipType.CLEAR
                             )
                         }

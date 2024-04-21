@@ -12,6 +12,7 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -47,7 +48,8 @@ class MainActivity : AppCompatActivity() {
 
     private var isPermissionGranted = false
 
-
+    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var homeViewModelFactory: HomeViewModelFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +63,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.clDeniedPermissions.visibility = View.GONE
 
+        homeViewModelFactory = HomeViewModelFactory(
+            WeatherRepoImpl.getInstance(
+                WeatherRemoteDataSourceImpl.getInstance(),
+                WeatherLocalDataSourceImpl(this)
+            )
+        )
+
+        homeViewModel = ViewModelProvider(this, homeViewModelFactory).get(HomeViewModel::class.java)
 
         initMainActivity()
 

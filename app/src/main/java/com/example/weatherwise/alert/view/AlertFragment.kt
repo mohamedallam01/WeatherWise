@@ -25,19 +25,21 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.airbnb.lottie.LottieAnimationView
+import com.example.weatherwise.R
 import com.example.weatherwise.alert.CHANNEL_ID
 import com.example.weatherwise.alert.NotificationReceiver
 import com.example.weatherwise.alert.viewmodel.AlertViewModel
 import com.example.weatherwise.alert.viewmodel.AlertViewModelFactory
 import com.example.weatherwise.databinding.FragmentAlertBinding
 import com.example.weatherwise.dp.WeatherLocalDataSourceImpl
-import com.example.weatherwise.home.view.LATITUDE
-import com.example.weatherwise.home.view.LOCATION
-import com.example.weatherwise.home.view.LONGITUDE
 import com.example.weatherwise.model.entities.Alert
 import com.example.weatherwise.model.repo.WeatherRepoImpl
 import com.example.weatherwise.network.WeatherRemoteDataSourceImpl
 import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.LATITUDE
+import com.example.weatherwise.util.LOCATION
+import com.example.weatherwise.util.LONGITUDE
 import com.example.weatherwise.util.getAddress
 import com.example.weatherwise.util.round
 import kotlinx.coroutines.Dispatchers
@@ -87,6 +89,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
     private lateinit var alertAdapter: AlertAdapter
     private var insertedAlert: Alert? = null
     private lateinit var alarmManager: AlarmManager
+    private lateinit var emptyAnimationAlert: LottieAnimationView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,6 +100,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
         )
         alarmManager =
             requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
 
         createNotificationChannel()
     }
@@ -113,8 +117,7 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        locationSharedPreferences =
+            locationSharedPreferences =
             requireContext().getSharedPreferences(LOCATION, Context.MODE_PRIVATE)
 
         alertAdapter = AlertAdapter(requireContext(), this)
@@ -138,7 +141,14 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
         lifecycleScope.launch {
             alertViewModel.allAlerts.collect {
-                alertAdapter.submitList(it)
+
+                if (it.isEmpty()){
+                    binding.emptyAnimationViewAlert.visibility = View.VISIBLE
+                }
+                else{
+                    binding.emptyAnimationViewAlert.visibility = View.GONE
+                    alertAdapter.submitList(it)
+                }
             }
 
         }
@@ -183,8 +193,8 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
                 geocoder.getAddress(
                     latitudeFromPrefs?.toDouble()?.round(4) ?: 0.0,
                     longitudeFromPrefs?.toDouble()?.round(4) ?: 0.0
-                )!!
-            val city = address.locality ?: address.extras.getString("sub-admin", "Unknown area")
+                )
+            val city = address?.locality ?: address?.extras?.getString("sub-admin", "Unknown area") ?: "Unknown"
             val dateAndTime = sdf.format(calendar.time).split(" ")
 
             withContext(Dispatchers.Main) {
@@ -364,5 +374,4 @@ class AlertFragment : Fragment(), DatePickerDialog.OnDateSetListener,
 
 
 }
-
 

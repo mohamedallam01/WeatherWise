@@ -23,14 +23,10 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.example.weatherwise.R
 import com.example.weatherwise.util.ChecksManager
+import com.example.weatherwise.util.PREFERENCES_FRAGMENT
 import java.util.Locale
 
 
-const val TEMP_UNIT_KEY = "temp_unit_key"
-const val LOCATION_GPS_KEY = "location_gps"
-const val WIND_UNIT_KEY = "wind_unit_key"
-const val LANG_KEY = "Lang_key"
-const val PREFERENCES_FRAGMENT = "preferences_fragment"
 
 class PreferencesFragment : PreferenceFragmentCompat() {
 
