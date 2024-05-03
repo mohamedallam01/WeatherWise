@@ -54,18 +54,16 @@ WeatherWise is an Android mobile application that provides users with real-time 
     <img src="https://i.imgur.com/cwZKTcy.jpeg" width="30%">
 </div>
 
-## Installation
-
-To install MealMate on your device:
-
-1. Download the app file from the ((https://github.com/mohamedallam01/WeatherWise))
-## Usage
-
-1. Launch the WeatherWise app on your device.
-2. Log in or sign up to access features.
-3. Explore home, alerts, and favorite screens.
-4. Add your favorite location for quick access.
-5. Add alerts for your location on your desired time.
+## Teck Stack
+- Kotlin
+- MVVM Architecture Pattern
+- Retrofit
+- Room
+- Coroutines
+- Navigation Component
+- Alarm Manager
+- Repository Pattern
+- Recyclerview
 
 ## Contributing
 
