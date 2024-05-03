@@ -26,7 +26,6 @@ WeatherWise is an Android mobile application that provides users with real-time 
     <img src="https://i.imgur.com/5lJCTw3.jpeg" width="30%">
     <img src="https://i.imgur.com/IPv0eJN.jpeg" width="30%">
     <img src="https://i.imgur.com/fqa6hlv.jpeg" width="30%">
-    <img src="https://i.imgur.com/fqa6hlv.jpeg" width="30%">
     <img src="https://i.imgur.com/sqtNzeK.jpeg" width="30%">
     <img src="https://i.imgur.com/CWfabS4.jpeg" width="30%">
 
