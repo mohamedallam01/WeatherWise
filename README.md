@@ -64,6 +64,7 @@ WeatherWise is an Android mobile application that provides users with real-time 
 - Shared Preferences
 - Alarm Manager
 - Repository Pattern
+- Open Street Map
 - Recyclerview
 - Unit Testing
 - View Binding
