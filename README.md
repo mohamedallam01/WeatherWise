@@ -45,7 +45,7 @@ WeatherWise is an Android mobile application that provides users with real-time 
   - Choose location by GPS or map
   - Choose temperature and wind speed units
   - Choose language (Arabic, English)
-  - 
+    
 <div style="display:flex; justify-content:space-between;">
     <img src="https://i.imgur.com/eHYiUUf.jpeg" width="30%">
     <img src="https://i.imgur.com/kFIPxPb.jpeg" width="30%">
