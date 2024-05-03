@@ -12,19 +12,48 @@ WeatherWise is an Android mobile application that provides users with real-time 
   - Show current date and time
   - View hourly and 5-day forecasts
   - Display weather icon and description
+<div style="display:flex; justify-content:space-between;">
+    <img src="https://i.imgur.com/yrxeX5n.jpeg" width="30%">
+    <img src="https://i.imgur.com/gNpDsKi.jpeg" width="30%">
+</div>
 
 - **Weather Alerts Screen:**
   - Set alarms for specific weather conditions
   - Customize alarm duration and type
+ 
+<div style="display:flex; justify-content:space-between;">
+    <img src="https://i.imgur.com/rkU7TxM.jpeg" width="30%">
+    <img src="https://i.imgur.com/5lJCTw3.jpeg" width="30%">
+    <img src="https://i.imgur.com/IPv0eJN.jpeg" width="30%">
+    <img src="https://i.imgur.com/fqa6hlv.jpeg" width="30%">
+    <img src="https://i.imgur.com/fqa6hlv.jpeg" width="30%">
+    <img src="https://i.imgur.com/sqtNzeK.jpeg" width="30%">
+    <img src="https://i.imgur.com/CWfabS4.jpeg" width="30%">
+
+</div>
 
 - **Favorite Screen:**
   - View a list of favorite locations
   - Add, remove, and manage favorite locations
+    
+<div style="display:flex; justify-content:space-between;">
+    <img src="https://i.imgur.com/Ci8FFyR.jpeg" width="30%">
+    <img src="https://i.imgur.com/mp8zGBc.jpeg" width="30%">
+    <img src="https://i.imgur.com/HpOd9GD.jpeg" width="30%">
+</div>
  
 - **Settings Screen:**
   - Choose location by GPS or map
   - Choose temperature and wind speed units
   - Choose language (Arabic, English)
+  - 
+<div style="display:flex; justify-content:space-between;">
+    <img src="https://i.imgur.com/eHYiUUf.jpeg" width="30%">
+    <img src="https://i.imgur.com/kFIPxPb.jpeg" width="30%">
+    <img src="https://i.imgur.com/Q6CkJzc.jpeg" width="30%">
+    <img src="https://i.imgur.com/D2jqZ58.jpeg" width="30%">
+    <img src="https://i.imgur.com/cwZKTcy.jpeg" width="30%">
+</div>
 
 ## Installation
 
